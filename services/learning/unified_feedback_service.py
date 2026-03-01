@@ -16,9 +16,9 @@ logger = setup_logger(__name__)
 
 
 LEARNING_RATE_MAP = {
-    "mild": 0.02,
-    "medium": 0.05,
-    "strong": 0.10
+    "mild": 0.08,
+    "medium": 0.15,
+    "strong": 0.25
 }
 
 
@@ -89,6 +89,9 @@ class UnifiedFeedbackService:
                 feedback_type,
                 feedback.timestamp
             )
+            if feedback_type in [FeedbackType.DISLIKE, FeedbackType.SKIP] and item.ingredients:
+                learning_rate = LEARNING_RATE_MAP.get(intensity, 0.05)
+                self._track_disliked_ingredients(user, item, learning_rate * 2.0)
         else:
             self._update_user_profile(
                 user=user,
@@ -107,7 +110,8 @@ class UnifiedFeedbackService:
                 db_session=db_session,
                 user_id=user.id,
                 item_id=item.id,
-                was_disliked=(feedback_type in [FeedbackType.DISLIKE, FeedbackType.SKIP]),
+                was_dismissed=(feedback_type == FeedbackType.SKIP),
+                was_disliked=(feedback_type == FeedbackType.DISLIKE),
                 was_liked=(feedback_type == FeedbackType.LIKE),
                 was_ordered=(feedback_type in [FeedbackType.SELECTED, FeedbackType.ACCEPTED])
             )
@@ -197,31 +201,17 @@ class UnifiedFeedbackService:
             if item.ingredients:
                 self._track_disliked_ingredients(user, item, learning_rate * negative_multiplier)
             
-            item_id_str = str(item.id)
             logger.info(
                 "Applied aggressive negative learning",
                 extra={
                     "user_id": str(user.id),
-                    "item_id": item_id_str,
+                    "item_id": str(item.id),
                     "intensity": intensity,
                     "feedback_type": feedback_type.value,
                     "negative_multiplier": negative_multiplier,
                     "learning_rate": learning_rate
                 }
             )
-            if intensity == "strong" and item_id_str not in user.permanently_excluded_items:
-                user.permanently_excluded_items = user.permanently_excluded_items + [item_id_str]
-                flag_modified(user, "permanently_excluded_items")
-                logger.info(
-                    "Item added to permanent exclusions",
-                    extra={
-                        "user_id": str(user.id),
-                        "item_id": item_id_str,
-                        "new_exclusions_count": len(user.permanently_excluded_items),
-                        "all_excluded_ids": user.permanently_excluded_items,
-                        "intensity": intensity
-                    }
-                )
 
         
         logger.info(

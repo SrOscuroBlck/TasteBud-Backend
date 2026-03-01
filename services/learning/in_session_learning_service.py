@@ -15,14 +15,16 @@ class InSessionLearningService:
         self,
         user: User,
         session_feedback: List[RecommendationFeedback],
-        session: RecommendationSession
+        session: RecommendationSession,
+        items_map: Dict[str, MenuItem] | None = None,
     ) -> Dict[str, float]:
         if not session_feedback:
             return {}
-        
-        # Use TASTE_AXES to ensure Phase 1 compliant axis names
+
         adjustments = {axis: 0.0 for axis in TASTE_AXES}
-        
+        if items_map is None:
+            items_map = {}
+
         liked_items = [
             fb for fb in session_feedback
             if fb.feedback_type in ["like", "save_for_later"]
@@ -31,16 +33,36 @@ class InSessionLearningService:
             fb for fb in session_feedback
             if fb.feedback_type == "dislike"
         ]
-        
+
+        for feedback in liked_items:
+            item = items_map.get(str(feedback.item_id))
+            if not item:
+                continue
+            for axis, value in item.features.items():
+                if axis in adjustments and value > 0.4:
+                    adjustments[axis] += 0.15 * value
+
+        for feedback in disliked_items:
+            item = items_map.get(str(feedback.item_id))
+            if not item:
+                continue
+            for axis, value in item.features.items():
+                if axis in adjustments and value > 0.4:
+                    adjustments[axis] -= 0.20 * value
+
+        for axis in adjustments:
+            adjustments[axis] = max(-0.5, min(0.5, adjustments[axis]))
+
         logger.info(
             "Calculating session adjustments",
             extra={
                 "session_id": str(session.id),
                 "liked": len(liked_items),
-                "disliked": len(disliked_items)
-            }
+                "disliked": len(disliked_items),
+                "adjustments": {k: round(v, 3) for k, v in adjustments.items() if v != 0.0},
+            },
         )
-        
+
         return adjustments
     
     def apply_immediate_learning(
@@ -139,27 +161,27 @@ class InSessionLearningService:
             item = items_map.get(str(feedback.item_id))
             if not item:
                 continue
-            
+
             for axis, value in item.features.items():
-                if axis in taste_adjustments and value > 0.6:
-                    taste_adjustments[axis] -= 0.08 * value
-        
+                if axis in taste_adjustments and value > 0.4:
+                    taste_adjustments[axis] -= 0.20 * value
+
         liked_items = [
             fb for fb in session_feedback
             if fb.feedback_type in ["like", "save_for_later"]
         ]
-        
+
         for feedback in liked_items:
             item = items_map.get(str(feedback.item_id))
             if not item:
                 continue
-            
+
             for axis, value in item.features.items():
-                if axis in taste_adjustments and value > 0.6:
-                    taste_adjustments[axis] += 0.05 * value
-        
+                if axis in taste_adjustments and value > 0.4:
+                    taste_adjustments[axis] += 0.15 * value
+
         for axis in taste_adjustments:
-            taste_adjustments[axis] = max(-0.3, min(0.3, taste_adjustments[axis]))
+            taste_adjustments[axis] = max(-0.5, min(0.5, taste_adjustments[axis]))
         
         return {
             "taste_adjustments": taste_adjustments,

@@ -3,6 +3,7 @@ from typing import List, Tuple
 from datetime import datetime, timedelta
 
 from models import MenuItem, Restaurant, UserOrderHistory
+from models.session import MealIntent
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -23,13 +24,25 @@ class ContextEnhancementService:
         dinner_courses = ["dinner", "entree", "main"]
         light_courses = ["appetizer", "snack", "side", "beverage", "dessert"]
         
+        if 6 <= hour < 10:
+            has_breakfast = any(
+                (item.course or "").lower() in breakfast_courses
+                for item in items
+            )
+            if not has_breakfast:
+                logger.info(
+                    "Restaurant has no breakfast items, skipping breakfast time filter",
+                    extra={"hour": hour, "item_count": len(items)}
+                )
+                return items
+        
         filtered = []
         
         for item in items:
             course = (item.course or "").lower()
             
             if 6 <= hour < 10:
-                if not course or course in breakfast_courses or course == "beverage":
+                if course in breakfast_courses:
                     filtered.append(item)
             
             elif 10 <= hour < 14:
@@ -231,3 +244,44 @@ class ContextEnhancementService:
                 by_course["other"].append(item)
         
         return by_course
+    
+    def get_available_intents(
+        self,
+        menu_items: list[MenuItem]
+    ) -> list[MealIntent]:
+        by_course = self.separate_by_course(menu_items)
+        
+        has_appetizer = len(by_course["appetizer"]) > 0
+        has_main = len(by_course["main"]) > 0
+        has_dessert = len(by_course["dessert"]) > 0
+        has_beverage = len(by_course["beverage"]) > 0
+        has_snack = has_appetizer or len(by_course["other"]) > 0
+        
+        available: list[MealIntent] = []
+        
+        if has_main:
+            available.append(MealIntent.MAIN_ONLY)
+        
+        if has_appetizer and has_main and has_dessert:
+            available.append(MealIntent.FULL_MEAL)
+        
+        if has_appetizer:
+            available.append(MealIntent.APPETIZER_ONLY)
+        
+        if has_dessert:
+            available.append(MealIntent.DESSERT_ONLY)
+        
+        if has_beverage:
+            available.append(MealIntent.BEVERAGE_ONLY)
+        
+        if has_snack:
+            available.append(MealIntent.LIGHT_SNACK)
+        
+        if not available and menu_items:
+            logger.warning(
+                "No intents matched course data, defaulting to main_only",
+                extra={"menu_count": len(menu_items)}
+            )
+            available.append(MealIntent.MAIN_ONLY)
+        
+        return available

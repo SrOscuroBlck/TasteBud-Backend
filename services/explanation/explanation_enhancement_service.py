@@ -15,11 +15,14 @@ class ExplanationEnhancementService:
         context: RecommendationSession,
         ranking_factors: Dict[str, float],
         user_history: List[UserOrderHistory],
-        confidence: float
+        confidence: float,
+        restaurant_has_breakfast: bool = True
     ) -> str:
         parts = []
         
-        time_context = self._get_time_context(context.time_of_day, context.meal_intent)
+        time_context = self._get_time_context(
+            context.time_of_day, context.meal_intent, restaurant_has_breakfast
+        )
         if time_context:
             parts.append(time_context)
         
@@ -47,7 +50,9 @@ class ExplanationEnhancementService:
         
         return explanation
     
-    def _get_time_context(self, time_of_day: str, meal_intent: str) -> str:
+    def _get_time_context(
+        self, time_of_day: str, meal_intent: str, restaurant_has_breakfast: bool = True
+    ) -> str:
         intent_phrases = {
             "appetizer": "Great starter choice!",
             "main": "Perfect main dish",
@@ -57,7 +62,7 @@ class ExplanationEnhancementService:
         }
         
         time_phrases = {
-            "morning": "Perfect for breakfast!",
+            "morning": "Perfect for breakfast!" if restaurant_has_breakfast else "",
             "afternoon": "Ideal lunch option!",
             "evening": "Perfect for dinner!",
             "late_afternoon": "Great afternoon pick!",

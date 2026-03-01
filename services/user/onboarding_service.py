@@ -11,6 +11,9 @@ from services.features.features import clamp01
 from services.features.gpt_helper import generate_onboarding_question
 from .archetype_service import get_archetype_by_id, find_closest_archetype
 from services.learning.bayesian_profile_service import BayesianProfileService
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 FALLBACK_QUESTIONS = [
@@ -233,6 +236,8 @@ class OnboardingService:
         if chosen_option:
             axis_impacts = chosen_option.get("axis_impacts", {})
             touched_axes = set()
+            updated_taste_vector = dict(user.taste_vector)
+            updated_uncertainty = dict(user.taste_uncertainty)
             for axis, delta in axis_impacts.items():
                 if axis not in TASTE_AXES:
                     continue
@@ -240,15 +245,18 @@ class OnboardingService:
                     v = float(delta)
                 except Exception:
                     continue
-                old = user.taste_vector.get(axis, 0.5)
-                user.taste_vector[axis] = clamp01(old + settings.ONBOARDING_K * v)
+                old = updated_taste_vector.get(axis, 0.5)
+                updated_taste_vector[axis] = clamp01(old + settings.ONBOARDING_K * v)
                 touched_axes.add(axis)
             
             for axis in touched_axes:
-                user.taste_uncertainty[axis] = max(
+                updated_uncertainty[axis] = max(
                     0.0,
-                    user.taste_uncertainty.get(axis, 0.5) - settings.ONBOARDING_SIGMA_STEP,
+                    updated_uncertainty.get(axis, 0.5) - settings.ONBOARDING_SIGMA_STEP,
                 )
+            
+            user.taste_vector = updated_taste_vector
+            user.taste_uncertainty = updated_uncertainty
         
         choice_record = {
             "question_id": question_id,
@@ -287,11 +295,21 @@ class OnboardingService:
 
     def _next_question(self, session: Session, user: User, state: OnboardingState) -> Dict[str, Any]:
         target_axes = self._top_uncertain_axes(user)
-        q = generate_onboarding_question(target_axes, user.allergies or [])
+        previous_prompts = [pair.get("prompt", "") for pair in state.answered_pairs if pair.get("prompt")]
+        q = generate_onboarding_question(target_axes, user.allergies or [], previous_prompts)
         if not q:
             fallback_index = len(state.answered_pairs) % len(FALLBACK_QUESTIONS)
             qf = FALLBACK_QUESTIONS[fallback_index]
             q = {"question_id": str(uuid4()), **qf}
+            logger.warning(
+                "Using fallback onboarding question (GPT failed or unavailable)",
+                extra={
+                    "user_id": str(user.id),
+                    "fallback_index": fallback_index,
+                    "target_axes": target_axes,
+                    "answered_count": len(state.answered_pairs),
+                },
+            )
         
         state.current_question_data = {
             "question_id": q["question_id"],

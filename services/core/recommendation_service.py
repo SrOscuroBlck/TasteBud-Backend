@@ -23,7 +23,7 @@ from services.core.session_service import RecommendationSessionService
 from services.learning.bayesian_profile_service import BayesianProfileService
 from config.settings import settings
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -480,6 +480,12 @@ class RecommendationService:
         q = select(MenuItem).where(MenuItem.restaurant_id == UUIDType(restaurant_id_str))
         all_items: List[MenuItem] = session.exec(q).all()
         
+        breakfast_courses = ["breakfast", "brunch"]
+        restaurant_has_breakfast = any(
+            (item.course or "").lower() in breakfast_courses
+            for item in all_items
+        )
+        
         safe: List[MenuItem] = []
         user_all = set(map(str.lower, user.allergies))
         
@@ -487,8 +493,7 @@ class RecommendationService:
             "allergen": 0,
             "diet": 0,
             "budget": 0,
-            "session_excluded": 0,
-            "permanently_excluded": 0
+            "session_excluded": 0
         }
         
         logger.info(
@@ -499,8 +504,7 @@ class RecommendationService:
                 "total_items": len(all_items),
                 "user_allergies": list(user.allergies),
                 "user_dietary_rules": list(user.dietary_rules),
-                "session_excluded_count": len(recommendation_session.excluded_items),
-                "permanently_excluded_count": len(user.permanently_excluded_items)
+                "session_excluded_count": len(recommendation_session.excluded_items)
             }
         )
         
@@ -523,10 +527,6 @@ class RecommendationService:
                 filtered_counts["session_excluded"] += 1
                 continue
             
-            if item_id_str in user.permanently_excluded_items:
-                filtered_counts["permanently_excluded"] += 1
-                continue
-            
             safe.append(it)
         
         logger.info(
@@ -539,8 +539,7 @@ class RecommendationService:
                 "filtered_by_allergen": filtered_counts["allergen"],
                 "filtered_by_diet": filtered_counts["diet"],
                 "filtered_by_budget": filtered_counts["budget"],
-                "filtered_by_session_exclusion": filtered_counts["session_excluded"],
-                "filtered_by_permanent_exclusion": filtered_counts["permanently_excluded"]
+                "filtered_by_session_exclusion": filtered_counts["session_excluded"]
             }
         )
         
@@ -605,23 +604,23 @@ class RecommendationService:
             select(UserOrderHistory).where(UserOrderHistory.user_id == user.id)
         ).all()
         
-        scored_with_penalty = self.context_service.apply_repeat_penalty(
-            intent_filtered,
-            order_history,
-            days_threshold=30
+        user_interaction_history = self.interaction_history_service.get_all_user_history(
+            db_session=session,
+            user_id=user.id,
         )
-        
-        candidates = [item for item, _ in scored_with_penalty]
-        
-        logger.info(
-            "Repeat penalty applied and candidates finalized",
-            extra={
-                "user_id": str(user.id),
-                "session_id": str(recommendation_session.id),
-                "candidate_count": len(candidates),
-                "order_history_count": len(order_history),
-                "days_threshold": 30
-            }
+
+        candidates = self._apply_cross_session_filters(
+            db_session=session,
+            items=intent_filtered,
+            user=user,
+            interaction_history=user_interaction_history,
+            order_history=order_history,
+        )
+
+        candidates = self._prioritize_fresh_candidates(
+            candidates=candidates,
+            interaction_history=user_interaction_history,
+            min_candidates=top_n * 2,
         )
         
         session_feedback = session.exec(
@@ -630,310 +629,349 @@ class RecommendationService:
             )
         ).all()
         
-        items_map = {str(item.id): item for item in candidates}
-        
-        profile_adjustments = self.in_session_learning.get_temporary_profile_adjustments(
-            user,
-            session_feedback,
-            items_map
+        items_map = {str(item.id): item for item in intent_filtered}
+        candidate_id_set = {str(item.id) for item in candidates}
+
+        from services.ml.llm_reranking_service import (
+            rerank_single_items,
+            compose_full_meal,
         )
-        
-        # Load Bayesian profile (Phase 2 learning system)
-        # Create profile on-demand if it doesn't exist
-        bayesian_profile = self.bayesian_profile_service.get_or_create_profile(session, user)
-        
-        # INTELLIGENT EXPLORATION: Use Thompson Sampling for diversity BUT
-        # blend with learned means to keep exploration centered on user preferences
-        # This gives variety while respecting what user likes
-        sampled_vector = bayesian_profile.sample_taste_preferences()
-        mean_vector = bayesian_profile.mean_preferences.copy()
-        
-        # Blend: 70% learned preference + 30% exploration
-        # This ensures recommendations vary but stay close to what user likes
-        base_taste_vector = {
-            axis: 0.7 * mean_vector.get(axis, 0.5) + 0.3 * sampled_vector.get(axis, 0.5)
-            for axis in sampled_vector.keys()
-        }
-        
-        logger.info(
-            "Using controlled Thompson Sampling (70% learned + 30% exploration)",
-            extra={
-                "user_id": str(user.id),
-                "session_id": str(recommendation_session.id),
-                "profile_id": str(bayesian_profile.id),
-                "mean_vector": {k: round(v, 3) for k, v in mean_vector.items()},
-                "sampled_vector": {k: round(v, 3) for k, v in sampled_vector.items()},
-                "final_vector": {k: round(v, 3) for k, v in base_taste_vector.items()}
-            }
-        )
-        
-        # Apply in-session adjustments on top of the base vector
-        adjusted_taste_vector = base_taste_vector.copy()
-        for axis, adjustment in profile_adjustments["taste_adjustments"].items():
-            adjusted_taste_vector[axis] = max(0.0, min(1.0, adjusted_taste_vector[axis] + adjustment))
-        
-        pop = session.exec(select(PopulationStats)).first()
-        pop_global = pop.item_popularity_global if pop else {}
-        
-        user_interaction_history = self.interaction_history_service.get_all_user_history(
-            db_session=session,
-            user_id=user.id
-        )
-        
-        from services.features.features import clamp01
-        base_scores: Dict[str, float] = {}
-        for it in candidates:
-            s = cosine_similarity(adjusted_taste_vector, it.features)
-            
-            # Apply cuisine affinity from Bayesian profile (persistent learning across sessions)
-            for cuisine in it.cuisine:
-                cuisine_pref = bayesian_profile.get_cuisine_preference(cuisine)
-                # Convert 0-1 preference to stronger adjustment (Phase 2 Bayesian learning)
-                cuisine_bonus = (cuisine_pref - 0.5) * 2.0 * settings.LAMBDA_CUISINE
-                s += cuisine_bonus
-            
-            # Then apply in-session adjustments (temporary within session)
-            for cuisine, adjustment in profile_adjustments["cuisine_adjustments"].items():
-                if cuisine in it.cuisine:
-                    s += adjustment * settings.LAMBDA_CUISINE
-            
-            popularity_score = pop_global.get(str(it.id), 0.0)
-            s += settings.LAMBDA_POP * popularity_score
-            
-            if recommendation_session.user_experience_level == "new":
-                s += popularity_score * 0.3
-            
-            for item, penalty in scored_with_penalty:
-                if str(item.id) == str(it.id) and penalty < 0:
-                    s += penalty
-                    break
-            
-            novelty_bonus = self.interaction_history_service.calculate_novelty_bonus(
-                user_interaction_history.get(it.id)
-            )
-            # Apply AGGRESSIVE penalty for disliked items (Bayesian learning
-            # handles long-term preferences, this handles explicit rejections)
-            # User explicitly rejected this - make it VERY unlikely to appear again
-            if novelty_bonus < -0.5:
-                s += novelty_bonus * 5.0  # Massive penalty for explicit dislikes/skips
-            elif novelty_bonus < 0:
-                s += novelty_bonus * 2.0  # Strong penalty for negative signals
-            else:
-                s += novelty_bonus * 0.2  # Scaled bonus for positive/neutral
-            
-            # Apply ingredient-level penalties for cross-restaurant learning
-            # If user disliked items with mozzarella, penalize ALL mozzarella items
-            ingredient_penalty = self._calculate_ingredient_penalty(user, it)
-            if ingredient_penalty > 0:
-                s -= ingredient_penalty
-            
-            base_scores[str(it.id)] = max(0.0, min(1.0, s))
-        
-        # CRITICAL: Sort candidates by base_scores to ensure highly-penalized items (disliked, skipped)
-        # are at the end. This ensures meal composition uses the best-scored items first.
-        candidates_sorted = sorted(
-            candidates,
-            key=lambda item: base_scores.get(str(item.id), 0.0),
-            reverse=True
-        )
-        
+
+        session_items_shown = recommendation_session.items_shown or []
+
         if recommendation_session.meal_intent == "full_meal":
-            # Check if we need partial regeneration
-            validation_state = recommendation_session.composition_validation_state.get(
-                recommendation_session.active_composition_id or "", {}
-            ) if recommendation_session.active_composition_id else {}
-            
-            # Determine which courses need regeneration
-            accepted_items = {}
-            courses_to_regenerate = []
-            
-            for course in ["appetizer", "main", "dessert"]:
-                course_state = validation_state.get(course, {})
-                status = course_state.get("status", "")
-                
-                if status == "accepted":
-                    # Keep this item
-                    from uuid import UUID as UUIDType
-                    item_id = UUIDType(course_state.get("item_id"))
-                    item = session.get(MenuItem, item_id)
-                    if item:
-                        accepted_items[course] = item
-                else:
-                    courses_to_regenerate.append(course)
-            
-            # If we have accepted items, do partial regeneration
-            if accepted_items and courses_to_regenerate:
-                composition_result = self.meal_composition.compose_partial_meal(
-                    user,
-                    candidates_sorted,
-                    recommendation_session,
-                    accepted_items=accepted_items,
-                    courses_to_regenerate=courses_to_regenerate,
-                    top_n=max(3, top_n // 3)
-                )
-            else:
-                # Full composition generation
-                composition_result = self.meal_composition.compose_full_meal(
-                    user,
-                    candidates_sorted,
-                    recommendation_session,
-                    top_n=max(3, top_n // 3)
-                )
-            
-            if composition_result.compositions:
-                results = []
-                session_service = RecommendationSessionService()
-                
-                for idx, comp in enumerate(composition_result.compositions):
-                    # Set first composition as active
-                    if idx == 0:
-                        session_service.set_active_composition(
-                            db_session=session,
-                            session_id=recommendation_session.id,
-                            composition_id=comp.composition_id,
-                            appetizer_id=comp.appetizer.id,
-                            main_id=comp.main.id,
-                            dessert_id=comp.dessert.id
-                        )
-                    
-                    # Record all items in composition as shown for interaction history tracking
-                    for item in [comp.appetizer, comp.main, comp.dessert]:
-                        try:
-                            self.interaction_history_service.record_item_shown(
-                                db_session=session,
-                                user_id=user.id,
-                                item_id=item.id,
-                                session_id=recommendation_session.id
-                            )
-                        except Exception as e:
-                            logger.warning(
-                                "Failed to record composition item view",
-                                extra={
-                                    "item_id": str(item.id),
-                                    "error": str(e)
-                                }
-                            )
-                    
-                    explanation = self.explanation_enhancement.generate_multi_course_explanation(
-                        comp,
-                        user,
-                        recommendation_session
-                    )
-                    
-                    results.append({
-                        "composition_id": comp.composition_id,
-                        "items": [
-                            self._format_item_response(session, comp.appetizer, user, recommendation_session, base_scores, order_history, user_interaction_history),
-                            self._format_item_response(session, comp.main, user, recommendation_session, base_scores, order_history, user_interaction_history),
-                            self._format_item_response(session, comp.dessert, user, recommendation_session, base_scores, order_history, user_interaction_history)
-                        ],
-                        "total_price": comp.total_price,
-                        "estimated_duration_minutes": comp.estimated_duration_minutes,
-                        "flavor_harmony_score": comp.flavor_harmony_score,
-                        "explanation": explanation
-                    })
-                
-                return {"items": results, "type": "composition"}
-            
-        # Apply MMR for diversity with configurable parameters
-        diversity_weight = getattr(settings, 'RECOMMENDATION_DIVERSITY_WEIGHT', 0.3)
-        use_mmr = getattr(settings, 'USE_MMR_DIVERSITY', True)
-        
-        # Create diversity constraints to prevent repetitive recommendations
-        constraints = DiversityConstraints(
-            max_items_per_cuisine=3,  # Max 3 items from same cuisine
-            max_items_per_restaurant=None,  # Restaurant filtered upstream
-            min_diversity_score=0.4  # Minimum acceptable diversity
-        )
-        
-        if use_mmr and len(candidates) > top_n:
-            logger.info(
-                "Applying MMR diversity reranking",
-                extra={
-                    "candidate_count": len(candidates),
-                    "top_n": top_n,
-                    "diversity_weight": diversity_weight,
-                    "user_id": str(user.id)
-                }
-            )
-            
-            # Use MMR to select diverse items
-            # CRITICAL: Pass base_scores so MMR uses penalized scores, not fresh cosine similarity
-            # This ensures dislike penalties, ingredient penalties, and novelty bonuses are preserved
-            top_items = self.mmr_service.rerank_with_mmr(
+            compositions_raw = compose_full_meal(
                 candidates=candidates,
-                user_taste_vector=adjusted_taste_vector,
-                k=top_n,
-                diversity_weight=diversity_weight,
-                constraints=constraints,
-                base_scores=base_scores
+                user=user,
+                rec_session=recommendation_session,
+                feedback_list=session_feedback,
+                items_map=items_map,
+                num_compositions=max(1, top_n // 3),
+                interaction_history=user_interaction_history,
+                items_shown=session_items_shown,
+                order_history=order_history,
             )
-            
-            final_diversity_score = self.mmr_service._compute_diversity_score(top_items)
-            
-            logger.info(
-                "MMR diversity reranking completed",
-                extra={
-                    "final_count": len(top_items),
-                    "diversity_score": round(final_diversity_score, 3),
-                    "session_id": str(recommendation_session.id)
+
+            results = []
+            session_service = RecommendationSessionService()
+
+            for idx, comp in enumerate(compositions_raw):
+                from uuid import UUID as UUIDType
+
+                appetizer = session.get(MenuItem, UUIDType(comp["appetizer_id"]))
+                main_item = session.get(MenuItem, UUIDType(comp["main_id"]))
+                dessert = session.get(MenuItem, UUIDType(comp["dessert_id"]))
+
+                if not all([appetizer, main_item, dessert]):
+                    continue
+
+                if idx == 0:
+                    session_service.set_active_composition(
+                        db_session=session,
+                        session_id=recommendation_session.id,
+                        composition_id=f"llm-{recommendation_session.iteration_count}-{idx}",
+                        appetizer_id=appetizer.id,
+                        main_id=main_item.id,
+                        dessert_id=dessert.id,
+                    )
+
+                for shown_item in [appetizer, main_item, dessert]:
+                    try:
+                        self.interaction_history_service.record_item_shown(
+                            db_session=session,
+                            user_id=user.id,
+                            item_id=shown_item.id,
+                            session_id=recommendation_session.id,
+                        )
+                    except Exception:
+                        pass
+
+                session_service.add_items_shown(
+                    db_session=session,
+                    session_id=recommendation_session.id,
+                    item_ids=[appetizer.id, main_item.id, dessert.id],
+                )
+
+                base_scores = {
+                    str(appetizer.id): 0.9,
+                    str(main_item.id): 0.9,
+                    str(dessert.id): 0.9,
                 }
-            )
-        else:
-            # Fallback: deterministic ranking by base_scores (no randomization)
-            logger.info(
-                "Using deterministic ranking",
-                extra={
-                    "candidate_count": len(candidates),
-                    "top_n": top_n,
-                    "reason": "too_few_candidates" if len(candidates) <= top_n else "mmr_disabled"
-                }
-            )
-            
-            # Sort by base_scores for consistent, personalized recommendations
-            sorted_items = sorted(
-                candidates,
-                key=lambda it: base_scores.get(str(it.id), 0.0),
-                reverse=True
-            )
-            top_items = sorted_items[:top_n]
-        
+
+                total_price = sum(
+                    i.price for i in [appetizer, main_item, dessert] if i.price
+                )
+
+                results.append({
+                    "composition_id": f"llm-{recommendation_session.iteration_count}-{idx}",
+                    "items": [
+                        self._format_item_response(
+                            session, appetizer, user, recommendation_session,
+                            base_scores, order_history, user_interaction_history,
+                            restaurant_has_breakfast,
+                        ),
+                        self._format_item_response(
+                            session, main_item, user, recommendation_session,
+                            base_scores, order_history, user_interaction_history,
+                            restaurant_has_breakfast,
+                        ),
+                        self._format_item_response(
+                            session, dessert, user, recommendation_session,
+                            base_scores, order_history, user_interaction_history,
+                            restaurant_has_breakfast,
+                        ),
+                    ],
+                    "total_price": total_price,
+                    "explanation": comp.get("meal_reasoning", ""),
+                })
+
+            if results:
+                return {"items": results, "type": "composition"}
+
+            return {"items": [], "warnings": ["no_valid_compositions"]}
+
+        llm_ranked = rerank_single_items(
+            candidates=candidates,
+            user=user,
+            rec_session=recommendation_session,
+            feedback_list=session_feedback,
+            items_map=items_map,
+            top_n=top_n,
+            interaction_history=user_interaction_history,
+            items_shown=session_items_shown,
+            order_history=order_history,
+        )
+
+        top_items: list[MenuItem] = []
+        for entry in llm_ranked:
+            if entry["item_id"] not in candidate_id_set:
+                continue
+            item = items_map.get(entry["item_id"])
+            if item:
+                top_items.append(item)
+
+        top_items = self._apply_dislike_penalty_reorder(
+            top_items, user_interaction_history
+        )
+
+        base_scores = {}
+        for rank_idx, item in enumerate(top_items):
+            score = max(0.01, 1.0 - rank_idx * (0.9 / max(len(top_items), 1)))
+            base_scores[str(item.id)] = round(score, 3)
+
         logger.info(
-            "Final recommendation set prepared",
+            "LLM reranking applied to session pipeline",
             extra={
                 "session_id": str(recommendation_session.id),
                 "user_id": str(user.id),
                 "item_count": len(top_items),
-                "iteration": recommendation_session.iteration_count
-            }
+                "iteration": recommendation_session.iteration_count,
+            },
         )
-        
+
         for item in top_items:
             try:
                 self.interaction_history_service.record_item_shown(
                     db_session=session,
                     user_id=user.id,
                     item_id=item.id,
-                    session_id=recommendation_session.id
+                    session_id=recommendation_session.id,
                 )
-            except Exception as e:
-                logger.warning(
-                    "Failed to record item view",
-                    extra={
-                        "item_id": str(item.id),
-                        "error": str(e)
-                    }
-                )
-        
+            except Exception:
+                pass
+
+        session_service = RecommendationSessionService()
+        session_service.add_items_shown(
+            db_session=session,
+            session_id=recommendation_session.id,
+            item_ids=[item.id for item in top_items],
+        )
+
         results = []
-        for idx, it in enumerate(top_items):
-            results.append(self._format_item_response(
-                session, it, user, recommendation_session, base_scores, 
-                order_history, user_interaction_history
-            ))
-        
+        for it in top_items:
+            formatted = self._format_item_response(
+                session, it, user, recommendation_session, base_scores,
+                order_history, user_interaction_history, restaurant_has_breakfast,
+            )
+            llm_entry = next(
+                (e for e in llm_ranked if e["item_id"] == str(it.id)), {}
+            )
+            if llm_entry.get("reason"):
+                formatted["llm_reason"] = llm_entry["reason"]
+            results.append(formatted)
+
         return {"items": results, "type": "single"}
     
+    def _apply_dislike_penalty_reorder(
+        self,
+        items: list[MenuItem],
+        interaction_history: Dict,
+    ) -> list[MenuItem]:
+        DISLIKE_RANK_PENALTY = 6
+        INGREDIENT_PENALTY_THRESHOLD = 0.3
+
+        non_penalized: list[MenuItem] = []
+        penalized: list[MenuItem] = []
+
+        for item in items:
+            item_history = interaction_history.get(item.id)
+            if item_history and (item_history.was_disliked or item_history.was_dismissed):
+                penalized.append(item)
+            else:
+                non_penalized.append(item)
+
+        if not penalized:
+            return items
+
+        reordered = list(non_penalized)
+        insert_position = min(len(reordered), DISLIKE_RANK_PENALTY)
+        for p_item in penalized:
+            reordered.insert(insert_position, p_item)
+            insert_position += 1
+
+        logger.info(
+            "Applied dislike/dismiss penalty reorder",
+            extra={
+                "penalized_count": len(penalized),
+                "penalized_names": [p.name for p in penalized],
+                "pushed_to_position": DISLIKE_RANK_PENALTY,
+                "total_items": len(reordered),
+            },
+        )
+
+        return reordered
+
+    def _apply_cross_session_filters(
+        self,
+        db_session: Session,
+        items: list[MenuItem],
+        user: User,
+        interaction_history: Dict,
+        order_history: list[UserOrderHistory],
+    ) -> list[MenuItem]:
+        DISLIKE_HARD_EXCLUDE_DAYS = 90
+        DISLIKE_DECAY_HALF_LIFE_DAYS = 120
+        ORDER_PENALTY_DAYS = 30
+
+        hard_cutoff = datetime.utcnow() - timedelta(days=DISLIKE_HARD_EXCLUDE_DAYS)
+
+        dislike_rows = db_session.exec(
+            select(RecommendationFeedback.item_id, RecommendationFeedback.timestamp)
+            .where(RecommendationFeedback.session_id.in_(
+                select(RecommendationSession.id)
+                .where(RecommendationSession.user_id == user.id)
+            ))
+            .where(RecommendationFeedback.feedback_type == "dislike")
+        ).all()
+
+        dislike_timestamps: dict[UUID, datetime] = {}
+        for item_id, ts in dislike_rows:
+            existing = dislike_timestamps.get(item_id)
+            if existing is None or ts > existing:
+                dislike_timestamps[item_id] = ts
+
+        recent_dislike_ids: set[UUID] = set()
+        decayed_dislike_penalties: dict[UUID, float] = {}
+
+        for item_id, ts in dislike_timestamps.items():
+            if ts >= hard_cutoff:
+                recent_dislike_ids.add(item_id)
+            else:
+                days_since = (datetime.utcnow() - ts).days
+                penalty = 0.6 * (0.5 ** (days_since / DISLIKE_DECAY_HALF_LIFE_DAYS))
+                decayed_dislike_penalties[item_id] = penalty
+
+        cutoff_order = datetime.utcnow() - timedelta(days=ORDER_PENALTY_DAYS)
+        recent_orders = {
+            str(order.item_id): order
+            for order in order_history
+            if order.ordered_at >= cutoff_order
+        }
+
+        excluded_names: list[str] = []
+        surviving: list[MenuItem] = []
+
+        for item in items:
+            if item.id in recent_dislike_ids:
+                excluded_names.append(item.name)
+                continue
+            surviving.append(item)
+
+        scored: list[tuple[MenuItem, float]] = []
+        for item in surviving:
+            history = interaction_history.get(item.id)
+            novelty = self.interaction_history_service.calculate_novelty_bonus(history)
+
+            old_dislike_penalty = decayed_dislike_penalties.get(item.id, 0.0)
+
+            order_penalty = 0.0
+            item_id_str = str(item.id)
+            if item_id_str in recent_orders:
+                order = recent_orders[item_id_str]
+                days_ago = (datetime.utcnow() - order.ordered_at).days
+                order_penalty = 0.3 * (1.0 - days_ago / ORDER_PENALTY_DAYS)
+                if order.enjoyed:
+                    order_penalty *= 0.5
+
+            combined = novelty - order_penalty - old_dislike_penalty
+            scored.append((item, combined))
+
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        logger.info(
+            "Cross-session filters applied",
+            extra={
+                "initial_count": len(items),
+                "hard_excluded_count": len(excluded_names),
+                "hard_excluded_names": excluded_names[:10],
+                "decayed_dislike_count": len(decayed_dislike_penalties),
+                "final_count": len(scored),
+                "recently_ordered_count": len(recent_orders),
+            },
+        )
+
+        return [item for item, _ in scored]
+
+    def _prioritize_fresh_candidates(
+        self,
+        candidates: list[MenuItem],
+        interaction_history: Dict,
+        min_candidates: int = 20,
+    ) -> list[MenuItem]:
+        fresh: list[MenuItem] = []
+        seen_not_ordered: list[MenuItem] = []
+        ordered: list[MenuItem] = []
+
+        for item in candidates:
+            history = interaction_history.get(item.id)
+            if not history:
+                fresh.append(item)
+            elif history.was_ordered:
+                ordered.append(item)
+            else:
+                seen_not_ordered.append(item)
+
+        if len(fresh) >= min_candidates:
+            result = fresh
+        else:
+            result = fresh + seen_not_ordered
+            if len(result) < min_candidates:
+                result = result + ordered
+
+        logger.info(
+            "Fresh-first candidate prioritization",
+            extra={
+                "total_candidates": len(candidates),
+                "fresh_count": len(fresh),
+                "seen_not_ordered_count": len(seen_not_ordered),
+                "ordered_count": len(ordered),
+                "final_count": len(result),
+                "fresh_only": len(fresh) >= min_candidates,
+            },
+        )
+
+        return result
+
     def _format_item_response(
         self,
         db_session: Session,
@@ -942,7 +980,8 @@ class RecommendationService:
         recommendation_session: RecommendationSession,
         base_scores: Dict[str, float],
         order_history: List[UserOrderHistory],
-        user_interaction_history: Dict
+        user_interaction_history: Dict,
+        restaurant_has_breakfast: bool = True
     ) -> Dict[str, Any]:
         score = base_scores.get(str(item.id), 0.5)
         
@@ -972,7 +1011,8 @@ class RecommendationService:
             recommendation_session,
             ranking_factors,
             order_history,
-            confidence
+            confidence,
+            restaurant_has_breakfast
         )
         
         item_history = user_interaction_history.get(item.id)

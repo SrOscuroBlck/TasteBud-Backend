@@ -181,11 +181,12 @@ class InteractionHistoryService:
         if not user_history:
             return 0.3
         
-        # CRITICAL: Penalize items user explicitly disliked or rejected
         if user_history.was_disliked:
             return -0.8
         
-        # Reward items user liked and ordered
+        if user_history.was_dismissed:
+            return -0.3
+        
         if user_history.was_ordered and user_history.was_liked:
             return 0.1
         

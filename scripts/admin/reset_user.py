@@ -151,6 +151,7 @@ def reset_user(user_id: UUID = None, email: str = None):
         user.disliked_ingredients = []
         user.onboarding_completed = False
         user.onboarding_state = {}
+        user.onboarding_choices = []
         
         session.add(user)
         session.commit()

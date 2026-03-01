@@ -10,6 +10,7 @@ from models import User
 from models.session import MealIntent, FeedbackType
 from services.core.session_service import RecommendationSessionService
 from services.core.recommendation_service import RecommendationService
+from services.ml.llm_reranking_service import LLMRecommendationError
 from services.learning.unified_feedback_service import UnifiedFeedbackService
 from routes.api import get_current_user
 from utils.logger import setup_logger
@@ -221,7 +222,7 @@ def get_next_recommendations(
             top_n=request.count
         )
         
-        db.commit()  # Commit composition state updates
+        db.commit()
         
         logger.info(
             "Next recommendations generated",
@@ -233,6 +234,20 @@ def get_next_recommendations(
         )
         
         return results
+    except LLMRecommendationError as e:
+        logger.error(
+            "LLM recommendation service unavailable",
+            extra={"error": str(e), "session_id": str(session_id)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "recommendation_service_unavailable",
+                "message": "Could not generate recommendations. Please try again.",
+                "retry_after_seconds": 5,
+            },
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

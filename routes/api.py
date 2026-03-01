@@ -10,6 +10,7 @@ from services.user.onboarding_service import OnboardingService
 from services.context.menu_service import MenuService
 from services.core.recommendation_service import RecommendationService
 from services.learning.unified_feedback_service import UnifiedFeedbackService
+from services.context.context_enhancement_service import ContextEnhancementService
 from services.user.auth_service import auth_service, AuthenticationError
 from services.features.gpt_helper import explain_similarity
 from utils.logger import setup_logger
@@ -579,6 +580,9 @@ def get_restaurant_details(restaurant_id: UUID, session: Session = Depends(get_s
         extra={"restaurant_id": str(restaurant_id), "menu_count": menu_count}
     )
     
+    context_service = ContextEnhancementService()
+    available_intents = context_service.get_available_intents(list(menu_items))
+    
     return {
         "id": str(restaurant.id),
         "name": restaurant.name,
@@ -587,7 +591,8 @@ def get_restaurant_details(restaurant_id: UUID, session: Session = Depends(get_s
         "menu_count": menu_count,
         "cuisines": sorted(list(cuisines)),
         "price_range": price_range,
-        "dietary_options": sorted(list(dietary_options))
+        "dietary_options": sorted(list(dietary_options)),
+        "available_intents": [intent.value for intent in available_intents]
     }
 
 

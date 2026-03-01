@@ -87,17 +87,18 @@ def generate_llm_taste_profile(
         context_parts.append(f"Cuisines: {cuisines_str}")
     
     context_text = "\n".join(context_parts)
+    context_text += "\n\nReturn valid JSON only."
     
     try:
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=settings.OPENAI_MODEL,
-            messages=[
-                {"role": "system", "content": TASTE_PROFILE_SYSTEM_PROMPT},
-                {"role": "user", "content": context_text}
-            ]
+            instructions=TASTE_PROFILE_SYSTEM_PROMPT,
+            input=context_text,
+            reasoning={"effort": "low"},
+            text={"format": {"type": "json_object"}},
         )
         
-        content = response.choices[0].message.content.strip()
+        content = response.output_text.strip()
         
         if "```" in content:
             parts = content.split("```")
