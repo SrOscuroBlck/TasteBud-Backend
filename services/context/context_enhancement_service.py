@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import List, Tuple
 from datetime import datetime, timedelta
 
 from models import MenuItem, Restaurant, UserOrderHistory
@@ -12,81 +11,45 @@ logger = setup_logger(__name__)
 class ContextEnhancementService:
     def apply_hard_time_filters(
         self,
-        items: List[MenuItem],
+        items: list[MenuItem],
         hour: int,
         strict: bool = True
-    ) -> List[MenuItem]:
+    ) -> list[MenuItem]:
         if not strict:
             return items
-        
+
         breakfast_courses = ["breakfast", "brunch"]
-        lunch_courses = ["lunch", "appetizer", "salad", "sandwich", "soup"]
-        dinner_courses = ["dinner", "entree", "main"]
-        light_courses = ["appetizer", "snack", "side", "beverage", "dessert"]
-        
-        if 6 <= hour < 10:
+        is_breakfast_window = 5 <= hour < 10
+
+        if is_breakfast_window:
             has_breakfast = any(
                 (item.course or "").lower() in breakfast_courses
                 for item in items
             )
-            if not has_breakfast:
+            if has_breakfast:
+                filtered = [
+                    item for item in items
+                    if (item.course or "").lower() in breakfast_courses
+                ]
                 logger.info(
-                    "Restaurant has no breakfast items, skipping breakfast time filter",
-                    extra={"hour": hour, "item_count": len(items)}
+                    "Breakfast time filter applied",
+                    extra={"hour": hour, "before": len(items), "after": len(filtered)}
                 )
-                return items
-        
-        filtered = []
-        
-        for item in items:
-            course = (item.course or "").lower()
-            
-            if 6 <= hour < 10:
-                if course in breakfast_courses:
-                    filtered.append(item)
-            
-            elif 10 <= hour < 14:
-                if course not in breakfast_courses:
-                    filtered.append(item)
-            
-            elif 14 <= hour < 17:
-                if course in light_courses or course in lunch_courses:
-                    filtered.append(item)
-            
-            elif 17 <= hour < 22:
-                if course not in breakfast_courses:
-                    filtered.append(item)
-            
-            else:
-                if course in light_courses:
-                    filtered.append(item)
-        
-        if not filtered and items:
-            logger.warning(
-                "Hard time filter excluded all items, relaxing constraint",
-                extra={"hour": hour, "original_count": len(items)}
+                return filtered
+
+            logger.info(
+                "Breakfast window but restaurant has no breakfast items, falling through to main courses",
+                extra={"hour": hour, "item_count": len(items)}
             )
-            return items
-        
-        logger.info(
-            "Time filter applied",
-            extra={
-                "hour": hour,
-                "before": len(items),
-                "after": len(filtered)
-            }
-        )
-        
-        return filtered
+
+        return items
     
     def apply_meal_intent_filters(
         self,
-        items: List[MenuItem],
+        items: list[MenuItem],
         meal_intent: str,
         hunger_level: str
-    ) -> List[MenuItem]:
-        filtered = []
-        
+    ) -> list[MenuItem]:
         course_mapping = {
             "full_meal": ["appetizer", "main", "entree", "dinner", "dessert"],
             "appetizer_only": ["appetizer", "starter", "salad", "soup"],
@@ -95,54 +58,56 @@ class ContextEnhancementService:
             "beverage_only": ["beverage", "drink"],
             "light_snack": ["appetizer", "snack", "side", "small plate"]
         }
-        
+
         allowed_courses = course_mapping.get(meal_intent, [])
-        
+
         if not allowed_courses:
-            logger.warning(f"Unknown meal_intent: {meal_intent}, returning all items")
+            logger.warning(
+                "Unknown meal_intent, returning all items",
+                extra={"meal_intent": meal_intent}
+            )
             return items
-        
+
+        filtered = []
         for item in items:
             course = (item.course or "").lower()
-            
-            # If item has no course classification
+
             if not course:
-                # For full_meal, include everything (no course is fine)
-                # For specific intents, skip items without course info
                 if meal_intent == "full_meal":
                     filtered.append(item)
                 continue
-            
-            # Check if item's course matches the meal intent
+
             for allowed in allowed_courses:
                 if allowed in course:
                     filtered.append(item)
                     break
-        
+
         if hunger_level == "light":
             filtered = [
                 item for item in filtered
                 if item.course and "main" not in item.course.lower()
             ]
-        
+
         if not filtered and items:
             logger.warning(
                 "Meal intent filter excluded all items",
                 extra={
                     "meal_intent": meal_intent,
-                    "original_count": len(items)
+                    "original_count": len(items),
+                    "available_courses": list(set(
+                        (item.course or "unknown").lower() for item in items
+                    )),
                 }
             )
-            return items[:10]
-        
+
         return filtered
     
     def apply_repeat_penalty(
         self,
-        items: List[MenuItem],
-        order_history: List[UserOrderHistory],
+        items: list[MenuItem],
+        order_history: list[UserOrderHistory],
         days_threshold: int = 30
-    ) -> List[Tuple[MenuItem, float]]:
+    ) -> list[tuple[MenuItem, float]]:
         cutoff_date = datetime.utcnow() - timedelta(days=days_threshold)
         
         recent_orders = {
@@ -172,7 +137,7 @@ class ContextEnhancementService:
     def detect_restaurant_type(
         self,
         restaurant: Restaurant,
-        menu_items: List[MenuItem]
+        menu_items: list[MenuItem]
     ) -> str:
         if not menu_items:
             return "casual"
@@ -219,8 +184,8 @@ class ContextEnhancementService:
     
     def separate_by_course(
         self,
-        items: List[MenuItem]
-    ) -> dict[str, List[MenuItem]]:
+        items: list[MenuItem]
+    ) -> dict[str, list[MenuItem]]:
         by_course = {
             "appetizer": [],
             "main": [],

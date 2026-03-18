@@ -201,6 +201,7 @@ class RecommendationService:
                 "safety_flags": [],
                 "cuisine": item.cuisine,
                 "price": item.price,
+                "image_url": item.provenance.get("image_url") if item.provenance else None,
                 "confidence": ranked_item.confidence,
                 "provenance": {
                     "source": item.provenance.get("source", "ingested"),
@@ -306,6 +307,7 @@ class RecommendationService:
                     "description": item.description,
                     "course": item.course,
                     "price": item.price,
+                    "image_url": item.provenance.get("image_url") if item.provenance else None,
                     "cuisine": item.cuisine,
                     "dietary_tags": item.dietary_tags,
                     "features": item.features,
@@ -450,6 +452,7 @@ class RecommendationService:
                 "safety_flags": [],
                 "cuisine": it.cuisine,
                 "price": it.price,
+                "image_url": it.provenance.get("image_url") if it.provenance else None,
                 "confidence": it.inference_confidence,
                 "provenance": {"source": it.provenance.get("source", "ingested"), "inference_confidence": it.inference_confidence},
             })
@@ -554,11 +557,12 @@ class RecommendationService:
             )
             return {"items": [], "warnings": ["no_safe_items"]}
         
-        # Skip time filtering for intents that need items from all time periods:
-        # - full_meal: needs appetizer + main + dessert (dessert blocked during breakfast)
-        # - dessert_only/beverage_only: can be consumed anytime
-        # Apply time filtering only for single-course intents that should match time of day
-        skip_time_filter_intents = ["full_meal", "dessert_only", "beverage_only"]
+        skip_time_filter_intents = [
+            "dessert_only",
+            "beverage_only",
+            "appetizer_only",
+            "light_snack",
+        ]
         apply_strict_time_filter = recommendation_session.meal_intent not in skip_time_filter_intents
         
         time_filtered = self.context_service.apply_hard_time_filters(
@@ -600,6 +604,18 @@ class RecommendationService:
             }
         )
         
+        if not intent_filtered:
+            logger.warning(
+                "No items match meal intent after filtering",
+                extra={
+                    "session_id": str(recommendation_session.id),
+                    "meal_intent": recommendation_session.meal_intent,
+                    "time_filtered_count": len(time_filtered),
+                    "safe_count": len(safe),
+                }
+            )
+            return {"items": [], "warnings": ["no_items_for_intent"]}
+        
         order_history = session.exec(
             select(UserOrderHistory).where(UserOrderHistory.user_id == user.id)
         ).all()
@@ -622,7 +638,12 @@ class RecommendationService:
             interaction_history=user_interaction_history,
             min_candidates=top_n * 2,
         )
-        
+
+        candidates = self._rank_by_taste_affinity(
+            candidates=candidates,
+            user=user,
+        )
+
         session_feedback = session.exec(
             select(RecommendationFeedback).where(
                 RecommendationFeedback.session_id == recommendation_session.id
@@ -841,6 +862,87 @@ class RecommendationService:
 
         return reordered
 
+    def _rank_by_taste_affinity(
+        self,
+        candidates: list[MenuItem],
+        user: User,
+    ) -> list[MenuItem]:
+        TASTE_WEIGHT = 0.55
+        CUISINE_WEIGHT = 0.25
+        INGREDIENT_WEIGHT = 0.20
+
+        user_taste = user.taste_vector or {}
+        user_cuisine = user.cuisine_affinity or {}
+        liked_ingredients = set(
+            ing.lower() for ing in (user.liked_ingredients or [])
+        )
+        disliked_ingredients = set(
+            ing.lower() for ing in (user.disliked_ingredients or [])
+        )
+
+        has_taste = bool(user_taste)
+        has_cuisine = bool(user_cuisine)
+        has_ingredient_prefs = bool(liked_ingredients or disliked_ingredients)
+
+        if not has_taste and not has_cuisine and not has_ingredient_prefs:
+            return candidates
+
+        scored: list[tuple[MenuItem, float]] = []
+
+        for item in candidates:
+            taste_score = 0.0
+            if has_taste and item.features:
+                taste_score = cosine_similarity(user_taste, item.features)
+
+            cuisine_score = 0.0
+            if has_cuisine and item.cuisine:
+                item_cuisines = [c.lower() for c in item.cuisine]
+                matching_affinities = [
+                    affinity
+                    for cuisine_name, affinity in user_cuisine.items()
+                    if cuisine_name.lower() in item_cuisines
+                ]
+                if matching_affinities:
+                    cuisine_score = max(matching_affinities)
+
+            ingredient_score = 0.5
+            if has_ingredient_prefs and item.ingredients:
+                item_ings = set(ing.lower() for ing in item.ingredients)
+                liked_overlap = len(item_ings & liked_ingredients)
+                disliked_overlap = len(item_ings & disliked_ingredients)
+                total_ings = max(len(item_ings), 1)
+                ingredient_score = 0.5 + (liked_overlap - disliked_overlap * 2) / total_ings
+                ingredient_score = max(0.0, min(1.0, ingredient_score))
+
+            combined = (
+                TASTE_WEIGHT * taste_score
+                + CUISINE_WEIGHT * cuisine_score
+                + INGREDIENT_WEIGHT * ingredient_score
+            )
+            scored.append((item, combined))
+
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        logger.info(
+            "Taste-affinity ranking applied",
+            extra={
+                "candidate_count": len(candidates),
+                "has_taste_vector": has_taste,
+                "has_cuisine_affinity": has_cuisine,
+                "has_ingredient_prefs": has_ingredient_prefs,
+                "top_3_scores": [
+                    {"name": item.name, "score": round(score, 3)}
+                    for item, score in scored[:3]
+                ],
+                "bottom_3_scores": [
+                    {"name": item.name, "score": round(score, 3)}
+                    for item, score in scored[-3:]
+                ],
+            },
+        )
+
+        return [item for item, _ in scored]
+
     def _apply_cross_session_filters(
         self,
         db_session: Session,
@@ -1024,6 +1126,7 @@ class RecommendationService:
             "description": item.description,
             "course": item.course,
             "price": item.price,
+            "image_url": item.provenance.get("image_url") if item.provenance else None,
             "score": round(score, 3),
             "confidence": round(confidence, 2),
             "confidence_explanation": confidence_explanation,

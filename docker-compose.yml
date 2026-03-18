@@ -61,6 +61,17 @@ services:
       - ./uploads:/app/uploads
     command: uvicorn main:app --host 0.0.0.0 --port 8010 --reload
 
+  scraper-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tastebud_scraper_test
+    volumes:
+      - ./:/app
+    profiles:
+      - scraper
+    entrypoint: ["python", "-m", "scripts.test_scraper"]
+
 volumes:
   tastebud_pg_data:
     driver: local

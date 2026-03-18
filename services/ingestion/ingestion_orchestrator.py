@@ -1,4 +1,6 @@
 from __future__ import annotations
+import asyncio
+import logging
 from typing import Optional, List, Dict, Tuple
 from uuid import UUID
 from datetime import datetime
@@ -12,6 +14,9 @@ from services.features.faiss_service import FAISSService
 from services.infrastructure.similarity_matrix_service import SimilarityMatrixService
 from .pdf_processor import PDFProcessor, PDFExtractionError
 from .menu_parser import MenuParser, MenuParsingError
+from .scraping.scraping_orchestrator import ScrapingOrchestrator, ScrapingOrchestratorError
+
+logger = logging.getLogger(__name__)
 
 
 class IngestionOrchestrator:
@@ -19,6 +24,7 @@ class IngestionOrchestrator:
         self.pdf_processor = PDFProcessor()
         self.menu_parser = MenuParser()
         self.embedding_service = EmbeddingService()
+        self.scraping_orchestrator = ScrapingOrchestrator()
     
     def process_pdf_upload(
         self,
@@ -84,6 +90,203 @@ class IngestionOrchestrator:
         
         return upload
     
+    def process_url_upload(
+        self,
+        session: Session,
+        restaurant_id: UUID,
+        source_url: str,
+        currency: Optional[str] = None,
+    ) -> MenuUpload:
+        if not source_url:
+            raise ValueError("source_url is required to process URL upload")
+
+        if not restaurant_id:
+            raise ValueError("restaurant_id is required to process URL upload")
+
+        restaurant = session.get(Restaurant, restaurant_id)
+        if not restaurant:
+            raise ValueError(f"Restaurant {restaurant_id} not found")
+
+        upload = MenuUpload(
+            restaurant_id=restaurant_id,
+            source_type=IngestionSource.URL,
+            status=IngestionStatus.PROCESSING,
+            source_url=source_url,
+        )
+        session.add(upload)
+        session.commit()
+        session.refresh(upload)
+
+        start_time = datetime.utcnow()
+
+        try:
+            scraped_result = asyncio.get_event_loop().run_until_complete(
+                self.scraping_orchestrator.scrape_menu(source_url)
+            )
+            scraped_result = self.scraping_orchestrator.filter_alcoholic_content(scraped_result)
+
+            extracted_text = self.scraping_orchestrator.build_extracted_text(scraped_result)
+            image_map = self.scraping_orchestrator.build_image_map(scraped_result)
+            upload.extracted_text = extracted_text
+            session.commit()
+
+            parsing_result = self._parse_menu(extracted_text, restaurant.name, currency)
+            upload.parsed_data = parsing_result.dict() if hasattr(parsing_result, 'dict') else parsing_result.model_dump()
+            session.commit()
+
+            menu_items = self._create_menu_items_with_images(
+                session, restaurant_id, parsing_result, image_map
+            )
+
+            upload.items_created = len(menu_items)
+            upload.status = IngestionStatus.COMPLETED
+
+            if len(menu_items) > 0:
+                self._rebuild_indexes_async(session)
+
+        except ScrapingOrchestratorError as e:
+            upload.status = IngestionStatus.FAILED
+            upload.error_message = f"Scraping failed: {str(e)}"
+        except (MenuParsingError, ValueError) as e:
+            upload.status = IngestionStatus.FAILED
+            upload.error_message = str(e)
+        except Exception as e:
+            upload.status = IngestionStatus.FAILED
+            upload.error_message = f"Unexpected error: {str(e)}"
+
+        end_time = datetime.utcnow()
+        upload.processing_time_seconds = (end_time - start_time).total_seconds()
+        upload.updated_at = end_time
+        session.commit()
+        session.refresh(upload)
+
+        return upload
+
+    async def process_url_upload_async(
+        self,
+        session: Session,
+        restaurant_id: UUID,
+        source_url: str,
+        currency: Optional[str] = None,
+    ) -> MenuUpload:
+        if not source_url:
+            raise ValueError("source_url is required to process URL upload")
+
+        if not restaurant_id:
+            raise ValueError("restaurant_id is required to process URL upload")
+
+        restaurant = session.get(Restaurant, restaurant_id)
+        if not restaurant:
+            raise ValueError(f"Restaurant {restaurant_id} not found")
+
+        upload = MenuUpload(
+            restaurant_id=restaurant_id,
+            source_type=IngestionSource.URL,
+            status=IngestionStatus.PROCESSING,
+            source_url=source_url,
+        )
+        session.add(upload)
+        session.commit()
+        session.refresh(upload)
+
+        start_time = datetime.utcnow()
+
+        try:
+            scraped_result = await self.scraping_orchestrator.scrape_menu(source_url)
+            scraped_result = self.scraping_orchestrator.filter_alcoholic_content(scraped_result)
+
+            extracted_text = self.scraping_orchestrator.build_extracted_text(scraped_result)
+            image_map = self.scraping_orchestrator.build_image_map(scraped_result)
+            upload.extracted_text = extracted_text
+            session.commit()
+
+            parsing_result = self._parse_menu(extracted_text, restaurant.name, currency)
+            upload.parsed_data = parsing_result.dict() if hasattr(parsing_result, 'dict') else parsing_result.model_dump()
+            session.commit()
+
+            menu_items = self._create_menu_items_with_images(
+                session, restaurant_id, parsing_result, image_map
+            )
+
+            upload.items_created = len(menu_items)
+            upload.status = IngestionStatus.COMPLETED
+
+            if len(menu_items) > 0:
+                self._rebuild_indexes_async(session)
+
+        except ScrapingOrchestratorError as e:
+            upload.status = IngestionStatus.FAILED
+            upload.error_message = f"Scraping failed: {str(e)}"
+        except (MenuParsingError, ValueError) as e:
+            upload.status = IngestionStatus.FAILED
+            upload.error_message = str(e)
+        except Exception as e:
+            upload.status = IngestionStatus.FAILED
+            upload.error_message = f"Unexpected error: {str(e)}"
+
+        end_time = datetime.utcnow()
+        upload.processing_time_seconds = (end_time - start_time).total_seconds()
+        upload.updated_at = end_time
+        session.commit()
+        session.refresh(upload)
+
+        return upload
+
+    def _create_menu_items_with_images(
+        self,
+        session: Session,
+        restaurant_id: UUID,
+        parsing_result: MenuParsingResult,
+        image_map: Dict[str, str],
+    ) -> List[MenuItem]:
+        created_items = []
+
+        for parsed_item in parsing_result.menu_items:
+            menu_item = self._build_menu_item(restaurant_id, parsed_item)
+
+            matched_image = self._find_image_for_item(parsed_item.name, image_map)
+            if matched_image:
+                menu_item.provenance["image_url"] = matched_image
+
+            session.add(menu_item)
+            created_items.append(menu_item)
+
+        session.commit()
+
+        for item in created_items:
+            session.refresh(item)
+            self._generate_embeddings_for_item(item)
+
+        session.commit()
+
+        return created_items
+
+    def _find_image_for_item(self, item_name: str, image_map: Dict[str, str]) -> Optional[str]:
+        if not image_map:
+            return None
+
+        normalized_name = item_name.strip().lower()
+
+        for scraped_name, image_url in image_map.items():
+            if scraped_name.strip().lower() == normalized_name:
+                return image_url
+
+        for scraped_name, image_url in image_map.items():
+            scraped_lower = scraped_name.strip().lower()
+            if normalized_name in scraped_lower or scraped_lower in normalized_name:
+                return image_url
+
+        item_words = set(normalized_name.split())
+        for scraped_name, image_url in image_map.items():
+            scraped_words = set(scraped_name.strip().lower().split())
+            if not scraped_words:
+                continue
+            overlap = scraped_words & item_words
+            if len(overlap) / len(scraped_words) >= 0.6:
+                return image_url
+
+        return None
+
     def _extract_text(self, file_path: str) -> str:
         extracted_text = self.pdf_processor.extract_text_from_pdf(file_path)
         

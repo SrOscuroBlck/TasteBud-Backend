@@ -543,6 +543,7 @@ def get_item_details(item_id: UUID, session: Session = Depends(get_session)):
         "cooking_method": item.cooking_method,
         "course": item.course,
         "features": item.features,
+        "image_url": item.provenance.get("image_url") if item.provenance else None,
         "provenance": item.provenance,
         "inference_confidence": item.inference_confidence
     }

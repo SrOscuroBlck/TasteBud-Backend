@@ -248,7 +248,27 @@ class OnboardingService:
                 old = updated_taste_vector.get(axis, 0.5)
                 updated_taste_vector[axis] = clamp01(old + settings.ONBOARDING_K * v)
                 touched_axes.add(axis)
-            
+
+            unchosen_option = next(
+                (opt for opt in options if opt.get("id") != chosen_option_id),
+                None,
+            )
+            UNCHOSEN_DAMPEN = 0.3
+            if unchosen_option:
+                unchosen_impacts = unchosen_option.get("axis_impacts", {})
+                for axis, delta in unchosen_impacts.items():
+                    if axis not in TASTE_AXES or axis in touched_axes:
+                        continue
+                    try:
+                        v = float(delta)
+                    except Exception:
+                        continue
+                    old = updated_taste_vector.get(axis, 0.5)
+                    updated_taste_vector[axis] = clamp01(
+                        old - settings.ONBOARDING_K * UNCHOSEN_DAMPEN * v
+                    )
+                    touched_axes.add(axis)
+
             for axis in touched_axes:
                 updated_uncertainty[axis] = max(
                     0.0,
@@ -364,7 +384,7 @@ class OnboardingService:
         total_choices = 0
         
         for answer in state.answered_pairs:
-            ingredients = answer.get("ingredients", [])
+            ingredients = answer.get("chosen_ingredients", [])
             for ingredient in ingredients:
                 cuisines = ingredient_cuisine_map.get(ingredient, [])
                 for cuisine in cuisines:

@@ -1,0 +1,1846 @@
+{
+  "restaurant_name": "Odiseo Bistro",
+  "restaurant_location": null,
+  "source_url": "https://menupp.co/odiseo",
+  "provider": "menupp",
+  "menus": [
+    {
+      "menu_name": "Menú de Temporada",
+      "menu_url": "https://menupp.co/odiseo/venue/uy5R7BxDdTRB3iuj1M3j/menu/ndXdF41ZTxHqByOD6wWv",
+      "sections": [
+        {
+          "name": "Entradas",
+          "items": [
+            {
+              "name": "Calamares Riojanos",
+              "description": "En salsa atomatada, ajo, cebolla, flambeados con brandy, acompañados de tostones de pan con mantequilla de ajo.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/product/ad757bde-755b-4de4-a22a-871ffdf8f030.webp",
+              "category": "Entradas",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Sopa De Camarón",
+              "description": "Aromatizada con limoncillo, curry verde, verduras frescas y cremoso de coco.",
+              "price": 45000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/product/d77d27ab-f60b-4e31-bb69-6ae649032c6c.webp",
+              "category": "Entradas",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tiradito De Salmón",
+              "description": "En finas láminas, aguacate tatemado, leche de tigre de maracuyá y aceite de ají guajillo.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/product/bff0f455-e892-4b82-bd8c-e19ee7119e44.webp",
+              "category": "Entradas",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Fuertes",
+          "items": [
+            {
+              "name": "Atún Índico",
+              "description": "Encostrado en especias, acompañado de tomates cherry orgánicos y rúcula inglesa.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Fuertes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Berenjena Marroquí",
+              "description": "Apanada, con centro de queso, en salsa de curry amarillo, tomates orgánicos y leche de coco.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Fuertes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Bife Porteño",
+              "description": "Bife angosto argentino con chimichurri, acompañado con croquetas de papa.",
+              "price": 135000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Fuertes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Linguini Al Vino",
+              "description": "Cocido al Malbec, acompañado de lomo argentino.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Fuertes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Lomo Saltado",
+              "description": "Salteado de res, cebolla, tomate, pimientos, ají amarillo, acompañado con arroz blanco y papa casco.",
+              "price": 90000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Fuertes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Rib Eye De Cerdo Americano",
+              "description": "Sobre salsa de mostaza acompañado con papas rústicas crocantes.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Fuertes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Postres",
+          "items": [
+            {
+              "name": "Mousse Au Chocolat",
+              "description": "Esponjoso de chocolate, mermelada de frambuesa y caramelo salado.",
+              "price": 35000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Postres",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Némesis De Chocolate",
+              "description": "Galleta crocante, con relleno cremoso de chocolate al 60%, acompañado de helado de vainilla.",
+              "price": 35000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Postres",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "menu_name": "Carta de Comida",
+      "menu_url": "https://menupp.co/odiseo/venue/uy5R7BxDdTRB3iuj1M3j/menu/8f7400b9-d3cb-44ae-89d4-d972e8bd56bb",
+      "sections": [
+        {
+          "name": "Entradas Calientes",
+          "items": [
+            {
+              "name": "Balón De Coliflor",
+              "description": "Cocido al vacío y horneado en mantequilla, reposado sobre espinaca a la crema, almendras, orellanas y trufa blanca.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/b51b5683-226b-4269-aa5e-6f043d31264a.webp",
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Camarones Cremosos",
+              "description": "Rebosados en panko y bañados en mayonesa japonesa.",
+              "price": 65000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/d374e69b-4aa9-4670-a318-f25f01801347.webp",
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Ceviche A Las Brasas",
+              "description": "Pescado blanco, atún y camarón a la parrilla, marinados en leche de tigre de ají amarillo, con un toque cítrico y especiado.",
+              "price": 62000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/product/3665c4ca-e303-4e6f-ac7a-1378ed68f175.webp",
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Chicharrón Confitado",
+              "description": "Cocido al vacío por 24 horas, sobre una lámina crocante de camote, coronado con salsa de ajíes y cebolla roja (5 und).",
+              "price": 60000.0,
+              "price_label": "5 und",
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/058e3c53-54a6-4725-9380-b9ec0b611ff1.webp",
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Croquetas De Pescado",
+              "description": "Pescado, camarón y queso mozzarella en salsa bechamel\ncon punto de caviar.",
+              "price": 60000.0,
+              "price_label": "5 und",
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Fritura De Mar",
+              "description": "Mix de mariscos rebosados en panko, acompañado de salsa atomatado ligeramente picante y suero con salsa de ostras.",
+              "price": 70000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Kebab",
+              "description": "Asados a la parrilla sobre raita de pepino.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Kibbes",
+              "description": "De lomo argentino, acompañado de hummus de la casa (5und).",
+              "price": 50000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Mini Burgers",
+              "description": "De carne angus argentina y ligeramente trufadas (2 und).",
+              "price": 40000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Papas Trufadas",
+              "description": "Francesas trufadas con queso parmesano.",
+              "price": 25000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Pulpo A La Parrilla",
+              "description": "Servido sobre papa gratinada al estilo francés.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Vieiras Gratinadas",
+              "description": "Doradas en salsa de vino blanco y terminadas con queso parmesano fundido (5 und).",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Calientes",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Entradas Frías",
+          "items": [
+            {
+              "name": "Carpaccio De Lomo",
+              "description": "Lomo angus argentino cortado a mano, acompañado de rúgula, láminas de queso parmesano y aceite de oliva.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Ceviche Atún",
+              "description": "En leche de tigre, mango, cilantro y semillas de calabaza.",
+              "price": 62000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Ceviche Odiseo",
+              "description": "Pesca fresca del día en leche de tigre al rocoto acompañado de maíz cancha y camote.",
+              "price": 62000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Jamón Cinco Jotas",
+              "description": "70g de jamón ibérico 100% de bellota.",
+              "price": 225000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Spicy Tuna",
+              "description": "Atún cremoso ligeramente picante sobre crispy de arroz (5 und).",
+              "price": 50000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Stracciatella Odiseo",
+              "description": "Tomates cherry orgánicos horneados con hilos de miel ligeramente picante y reducción de balsámico, sobre una cama de stracciatella.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tiradito De Ají Amarillo",
+              "description": "Finas láminas de corvina marinadas con leche de tigre de ají amarillo confitado.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Entradas Frías",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Arroz Blanco",
+              "description": "",
+              "price": 10000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Ensalada Verde Fresca",
+              "description": "",
+              "price": 12000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Espárragos Parrillados",
+              "description": "",
+              "price": 27000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Porción De Aguacate",
+              "description": "Con sal marina Maldon.",
+              "price": 15000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Puré De Papa",
+              "description": "",
+              "price": 15000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Quinua En Dos Texturas",
+              "description": "",
+              "price": 15000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Ensalada Griega",
+              "description": "Aceitunas kalamata, aceitunas verdes, pepino europeo, tomates cherry, cebolla morada, pimentón ahumado, queso feta y quinua crocante.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Ensalada Odiseo",
+              "description": "Mix de lechugas, rúgula y espinaca con nueces caramelizadas, arándanos deshidratados, cebolla roja curada al limón, manzana roja, granada y queso feta.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Sopa De Pescado",
+              "description": "Base de tomates ahumados y perejil con cubos de mero\nsalteados.",
+              "price": 45000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Sopa De Tomate",
+              "description": "Tomates frescos parrillados y albahaca, acompañada de tostada de queso.",
+              "price": 30000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tom Kha Kai",
+              "description": "Sopa tailandesa de pollo con leche de coco, jengibre,\nlimoncillo, champiñones y pimentón.",
+              "price": 40000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Arroz Caldoso De Mariscos",
+              "description": "Pescado, camarones, pulpo y mejillones.",
+              "price": 80000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Arroz Crocante De Chanchito",
+              "description": "Cocido en salsa de ají amarillo con cerdo confitado, morrillo y crispy de arroz, coronado con ensalada de cebolla morada.",
+              "price": 70000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [
+                "Recomendado"
+              ],
+              "is_recommended": true,
+              "is_new": false
+            },
+            {
+              "name": "Arroz Persa",
+              "description": "Salteado con pollo y camarones, pimentones frescos, curry y nueces crujientes.",
+              "price": 70000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Papardelle Al Teléfono",
+              "description": "Pasta ancha al pomodoro cremoso con bocconcini de mozzarella y albahaca fresca.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Papardelle En Salsa Bolognesa",
+              "description": "Pasta ancha en salsa bolognesa de lomo angus argentino.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Penne Gratinado",
+              "description": "Gratinado con espárragos, champiñones y prosciutto\ncrocante. Proteína a elección:",
+              "price": 65000.0,
+              "price_label": "Camarón",
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Pollo Baguette",
+              "description": "Pechuga parrillada sobre tapa de baguette, coronada con lajas de aguacate y pico de gallo, sobre espejo de seco peruano.",
+              "price": 65000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Pollo Toscano",
+              "description": "A la parrilla con salsa de tomates secos y alcaparras, acompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 65000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [
+                "Recomendado"
+              ],
+              "is_recommended": true,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "General",
+          "items": [
+            {
+              "name": "Boeuf Bourguignon De La Casa",
+              "description": "Trozos de res al vino tinto cocidos al vacío sobre risotto al\nparmesano con puntos de pesto.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Costilla Bourbon Bbq",
+              "description": "Prime Back Ribs American Choice horneada en salsa de whisky y especias, acompañada de papas a la francesa.",
+              "price": 135000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [
+                "Nuevo"
+              ],
+              "is_recommended": false,
+              "is_new": true
+            },
+            {
+              "name": "Entraña",
+              "description": "USDA High Choice",
+              "price": 160000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Entrecôte Café De Paris",
+              "description": "Lomo Angus argentino con mantequilla a las finas hierbas\nacompañado de papas a la francesa.",
+              "price": 135000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [
+                "Recomendado"
+              ],
+              "is_recommended": true,
+              "is_new": false
+            },
+            {
+              "name": "Lomo Con Camarones",
+              "description": "Sobre puré de papa, espinaca y salsa al ajillo.",
+              "price": 100000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Lomo / Picaña En Salsa Cremosa",
+              "description": "Con champiñones frescos, cebollitas doradas, maíz tierno, tocineta y un toque de vino blanco, acompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 115000.0,
+              "price_label": "Lomo Angus Argentino",
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Lomo / Picaña Odiseo",
+              "description": "En salsa de setas y crocante de cebolla acompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 105000.0,
+              "price_label": "Lomo Angus Argentino",
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "New York Americano",
+              "description": "Swift Black Angus. USDA Choice.",
+              "price": 240000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Pepper Steak",
+              "description": "Punta de anca encostrada en tres pimientas sobre espejo de\nvino tinto cremoso, acompañado de cascos de papa al\nromero.",
+              "price": 95000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [
+                "Recomendado"
+              ],
+              "is_recommended": true,
+              "is_new": false
+            },
+            {
+              "name": "Rib Eye Americano",
+              "description": "Swift Black Angus. USDA Choice",
+              "price": 275000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Atún Encostrado",
+              "description": "En ajonjolí negro sobre puré de papa y espejo de curry rojo.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Atún Tataki",
+              "description": "Encostrado en nuez pecan sobre risotto de orzo y zetas,\ncoronado con chimichurri de pimentones.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Corvina Al Limón",
+              "description": "Sobre orzo cremoso al limón y miga de pan.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Corvina Encostrada",
+              "description": "En costra de pistachos sobre risotto de espárragos.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Corvina Rostizada",
+              "description": "Sobre un tacu tacu de lentejas de Pui, lajas de banano asado, coronado con cebolla morada curada al limón.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Encocado Del Pacífico",
+              "description": "Pescado y camarones cocinados en especias de nuestro\npacífico colombiano, acompañado de arroz de coco.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Gambas Tandoori",
+              "description": "Parrilladas y horneadas en mantequilla tailandesa\nacompañadas de pan tostado (4 und.)",
+              "price": 105000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Langostinos Encocados",
+              "description": "Acompañados de milhoja de papa y espinaca (5 und).",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Langostinos Parrillados Al Ajillo",
+              "description": "Acompañado de ensalada de quinua en dos texturas (5 und.)",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Salmón Glaseado",
+              "description": "Con miel y mantequilla, ligeramente picante sobre un risotto de parmesano cremoso.",
+              "price": 82000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Salmón Griego",
+              "description": "A la parrilla sobre una cama de orzo, tomates cherry, aceitunas, garbanzos crocantes y queso feta.",
+              "price": 82000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Salmón Mediterráneo",
+              "description": "A la parrilla con salsa de tomates secos y alcaparras,\nacompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 82000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [
+                "Recomendado"
+              ],
+              "is_recommended": true,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Canasta De Frutos Rojos",
+              "description": "De masa philo, rellena de helado de vainilla, frutos rojos frescos y salsa inglesa.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Cannoli",
+              "description": "Rellenos de crema de arequipe sobre confitura de frutos rojos acompañado de helado de vainilla.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Créme Brulée",
+              "description": "Crema francesa con superficie crocante coronada con arándanos.",
+              "price": 28000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Milhojas",
+              "description": "Capas de masa philo rellenas con crema y cubierta de salsa de arequipe.",
+              "price": 30000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Sticky Toffee",
+              "description": "Pudín esponjoso y húmedo a base de dátiles, bañado en salsa de caramelo y acompañado de helado de vainilla.",
+              "price": 30000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Torrija",
+              "description": "Con salsa inglesa, moras frescas y helado.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Torta Vasca",
+              "description": "Acompañada de helado de vainilla.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "menu_name": "English Menu",
+      "menu_url": "https://menupp.co/odiseo/venue/uy5R7BxDdTRB3iuj1M3j/menu/2702ea2c-a411-47e5-aa7e-d1a7fd10e868",
+      "sections": [
+        {
+          "name": "Hot Appetizers",
+          "items": [
+            {
+              "name": "Cauliflower Sphere",
+              "description": "Cocido al vacío y horneado en mantequilla, reposado sobre espinaca a la crema, almendras, orellanas y trufa blanca.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Creamy Shrimps",
+              "description": "Breaded in panko and covered in Japanese mayonnaise.",
+              "price": 65000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Chicharrón Confitado",
+              "description": "Cocido al vacío por 24 horas, sobre una lámina crocante de camote, coronado con salsa de ajíes y cebolla roja (5 und).",
+              "price": 60000.0,
+              "price_label": "5 Units",
+              "image_url": null,
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Deep-Fried Seafood Mix",
+              "description": "Mix de mariscos rebosados en panko, acompañado de salsa atomatado ligeramente picante y suero con salsa de ostras.",
+              "price": 70000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Fish Croquettes",
+              "description": "Fish, shrimp, and mozzarella cheese in bechamel sauce with a touch of caviar.",
+              "price": 60000.0,
+              "price_label": "5 und",
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/507a56bf-46d0-4c98-815e-86176ef37bff.webp",
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Grilled Octopus",
+              "description": "Servido sobre papa gratinada al estilo francés.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/de6dfa35-1da9-48ce-90bc-c6d23410dd41.webp",
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Kibbes",
+              "description": "Argentine loin, accompanied by hummus (5 units).",
+              "price": 50000.0,
+              "price_label": "5 units",
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/d3ab5e65-ceaa-4916-84fc-a973e3a2a60b.webp",
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Mini Burgers",
+              "description": "Made with Argentine Angus Beef and lightly truffled (2 units).",
+              "price": 40000.0,
+              "price_label": "2 units",
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/6563fdb3-3789-417a-9e74-da1f1d209c35.webp",
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Scallops Au Gratin",
+              "description": "Doradas en salsa de vino blanco y terminadas con queso parmesano fundido (5 und).",
+              "price": 75000.0,
+              "price_label": "5 units",
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/product/3fad83e2-ea0b-43a7-95f0-9d002a3f7386.webp",
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Truffled Potatoes",
+              "description": "Truffled French fries with Parmesan cheese.",
+              "price": 25000.0,
+              "price_label": null,
+              "image_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/odiseo/1685bf1a-8638-4eb3-9143-fe91ae0260e0.webp",
+              "category": "Hot Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Cold Appetizers",
+          "items": [
+            {
+              "name": "Beef Carpaccio",
+              "description": "Hand-cut Argentine Angus sirloin, accompanied by arugula, parmesan cheese slices, and olive oil.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Cold Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tuna Ceviche",
+              "description": "In \"leche de tigre\", mango, cilantro and pumpkin seeds.",
+              "price": 62000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Cold Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Odiseo Ceviche",
+              "description": "Fresh catch of the day in \"leche de tigre\" with rocoto sauce, accompanied by cancha corn and sweet potato.",
+              "price": 62000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Cold Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Cinco Jotas Ham",
+              "description": "70g of 100% acorn-fed Iberian ham.",
+              "price": 225000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Cold Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Spicy Tuna",
+              "description": "Creamy, slightly spicy tuna on crispy rice (5 units).",
+              "price": 50000.0,
+              "price_label": "5 units",
+              "image_url": null,
+              "category": "Cold Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tiradito De Ají Amarillo",
+              "description": "Thin slices of sea bass marinated with \"leche de tigre\" and candied yellow chili.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Cold Appetizers",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "White Rice",
+              "description": "",
+              "price": 10000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Fresh Green Salad",
+              "description": "",
+              "price": 12000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Espárragos Parrillados",
+              "description": "",
+              "price": 27000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Avocado",
+              "description": "With Maldon sea salt.",
+              "price": 15000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Puré De Papa",
+              "description": "",
+              "price": 15000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Quinoa In Two Textures",
+              "description": "",
+              "price": 15000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Fish Soup",
+              "description": "Smoked tomato and parsley base with sautéed sea bass cubes.",
+              "price": 45000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tomato Soup",
+              "description": "Fresh grilled tomatoes and basil, accompanied by cheese toast.",
+              "price": 30000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tom Kha Kai",
+              "description": "Thai chicken soup with coconut milk, ginger, lemongrass, mushrooms, and paprika.",
+              "price": 40000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Greek Salad",
+              "description": "Kalamata olives, green olives, european cucumber, cherry tomatoes, red onion, smoked paprika, feta cheese, and crispy quinoa.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Odiseo Salad",
+              "description": "Mixed lettuce, arugula, and spinach with caramelized walnuts, dehydrated cranberries, lemon-cured red onion, red apple, pomegranate, and feta cheese.",
+              "price": 60000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Arroz Caldoso De Mariscos",
+              "description": "Fish, shrimp, octopus and mussels.",
+              "price": 80000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Arroz Crocante De Chanchito",
+              "description": "Cooked in yellow chili sauce with confit pork, beef rump and crispy rice, topped with red onion salad.",
+              "price": 70000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Arroz Persa",
+              "description": "Salteado con pollo y camarones, pimentones frescos, curry y nueces crujientes.",
+              "price": 70000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Papardelle Al Teléfono",
+              "description": "Wide creamy pomodoro pasta with mozzarella bocconcini and fresh basil.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Papardelle En Salsa Bolognesa",
+              "description": "Wide pasta in Argentine Angus sirloin bolognese sauce.",
+              "price": 55000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Penne Gratinado",
+              "description": "Gratinado con espárragos, champiñones y prosciutto\ncrocante. Proteína a elección:",
+              "price": 65000.0,
+              "price_label": "Shrimp",
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Pollo Baguette",
+              "description": "Grilled chicken breast on a baguette top, topped with slices of avocado and pico de gallo, on a Peruvian dry sauce.",
+              "price": 65000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Pollo Toscano",
+              "description": "A la parrilla con salsa de tomates secos y alcaparras, acompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 65000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "General",
+          "items": [
+            {
+              "name": "Boeuf Bourguignon De La Casa",
+              "description": "Vacuum-cooked chunks of beef in red wine on a parmesan risotto with pesto dots.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Costilla Bourbon Bbq",
+              "description": "American Choice Prime Back Ribs baked in a whiskey and spice sauce, accompanied by French fries.",
+              "price": 135000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Entraña",
+              "description": "USDA High Choice",
+              "price": 160000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Entrecôte Café De Paris",
+              "description": "Argentine Angus sirloin with herb butter, served with french fries.",
+              "price": 135000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Lomo Con Camarones",
+              "description": "Over mashed potatoes, spinach and garlic sauce.",
+              "price": 100000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Lomo / Picaña En Salsa Cremosa",
+              "description": "Con champiñones frescos, cebollitas doradas, maíz tierno, tocineta y un toque de vino blanco, acompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 115000.0,
+              "price_label": "Lomo Angus Argentino",
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Lomo / Picaña Odiseo",
+              "description": "En salsa de setas y crocante de cebolla acompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 105000.0,
+              "price_label": "Lomo Angus Argentino",
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "New York Americano",
+              "description": "Swift Black Angus. USDA Choice.",
+              "price": 240000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Pepper Steak",
+              "description": "Rump cap crusted with three peppers on a creamy red wine sauce, accompanied by rosemary potato wedges.",
+              "price": 95000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Rib Eye Americano",
+              "description": "Swift Black Angus. USDA Choice",
+              "price": 275000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "General",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Atún Encostrado",
+              "description": "In black sesame seeds on mashed potatoes and a mirror of red curry.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Atún Tataki",
+              "description": "Pecan-encrusted on orzo and mushroom risotto, topped with bell pepper chimichurri.",
+              "price": 75000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Corvina Al Limón",
+              "description": "On creamy lemon orzo and breadcrumbs.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Corvina Encostrada",
+              "description": "In a pistachio crust on asparagus risotto.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Corvina Rostizada",
+              "description": "Sobre un tacu tacu de lentejas de Pui, lajas de banano asado, coronado con cebolla morada curada al limón.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Encocado Del Pacífico",
+              "description": "Fish and shrimp cooked in spices from our Colombian pacific, accompanied by coconut rice.",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Langostinos Encocados",
+              "description": "Accompanied by potato millefeuille and spinach (5 units).",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Langostinos Parrillados Al Ajillo",
+              "description": "Accompanied by quinoa salad in two textures (5 units).",
+              "price": 98000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Salmon Glaseado",
+              "description": "Con miel y mantequilla, ligeramente picante sobre un risotto de parmesano cremoso.",
+              "price": 82000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Salmón Griego",
+              "description": "Grilled on a bed of orzo, cherry tomatoes, olives, crispy chickpeas, and feta cheese.",
+              "price": 82000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Salmón Mediterráneo",
+              "description": "A la parrilla con salsa de tomates secos y alcaparras,\nacompañado de arroz blanco o ensalada verde fresca o puré de papa.",
+              "price": 82000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Tandoori Prawns",
+              "description": "Grilled and baked in Thai butter accompanied by toasted bread (4 units).",
+              "price": 105000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "items": [
+            {
+              "name": "Canasta De Frutos Rojos",
+              "description": "Made from phyllo dough, filled with vanilla ice cream, fresh red berries and crème anglaise.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Créme Brulée",
+              "description": "French cream with a crunchy surface topped with blueberries.",
+              "price": 28000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Milhojas",
+              "description": "Layers of filo pastry filled with cream and covered with caramel sauce.",
+              "price": 30000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Sticky Toffee",
+              "description": "A fluffy and moist date-based pudding, topped with caramel sauce and served with vanilla ice cream.",
+              "price": 30000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Torrija",
+              "description": "With crème anglaise, fresh blackberries and ice cream.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            },
+            {
+              "name": "Torta Vasca",
+              "description": "Accompanied by vanilla ice cream.",
+              "price": 33000.0,
+              "price_label": null,
+              "image_url": null,
+              "category": "Uncategorized",
+              "subcategory": null,
+              "tags": [],
+              "is_recommended": false,
+              "is_new": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_items": 141
+}

@@ -31,6 +31,12 @@ class RestaurantCreateRequest(BaseModel):
     tags: List[str] = []
 
 
+class UrlScrapeRequest(BaseModel):
+    restaurant_id: str
+    url: str
+    currency: str | None = None
+
+
 class RestaurantResponse(BaseModel):
     id: str
     name: str
@@ -248,3 +254,59 @@ def list_uploads(
         }
         for u in uploads
     ]
+
+
+@router.post("/upload/url", response_model=UploadResponse)
+async def upload_url_menu(
+    request: UrlScrapeRequest,
+    session: Session = Depends(get_session),
+) -> UploadResponse:
+    if not request.restaurant_id:
+        raise HTTPException(status_code=400, detail="restaurant_id is required")
+
+    if not request.url:
+        raise HTTPException(status_code=400, detail="url is required")
+
+    try:
+        restaurant_uuid = UUID(request.restaurant_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid restaurant_id format")
+
+    restaurant = session.get(Restaurant, restaurant_uuid)
+    if not restaurant:
+        raise HTTPException(
+            status_code=404, detail=f"Restaurant {request.restaurant_id} not found"
+        )
+
+    orchestrator = IngestionOrchestrator()
+
+    try:
+        upload = await orchestrator.process_url_upload_async(
+            session=session,
+            restaurant_id=restaurant_uuid,
+            source_url=request.url,
+            currency=request.currency,
+        )
+
+        notes = ""
+        if upload.status == IngestionStatus.COMPLETED:
+            notes = f"Successfully scraped and extracted {upload.items_created} menu items from {request.url}"
+
+        return UploadResponse(
+            upload_id=str(upload.id),
+            restaurant_id=str(upload.restaurant_id),
+            status=upload.status.value
+            if isinstance(upload.status, IngestionStatus)
+            else upload.status,
+            items_created=upload.items_created,
+            items_failed=upload.items_failed,
+            processing_time_seconds=upload.processing_time_seconds or 0.0,
+            error_message=upload.error_message,
+            notes=notes,
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
