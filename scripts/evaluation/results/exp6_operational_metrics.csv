@@ -1,0 +1,22 @@
+latency_ms,input_tokens,output_tokens,total_tokens,status,candidate_count,call_num,user_label,success
+19466.4,2099,2108,4207,completed,20,1,Carlos,True
+16008.9,1938,1804,3742,completed,20,2,Valentina,True
+20992.3,2006,2212,4218,completed,20,3,Andres,True
+15013.2,1756,1906,3662,completed,20,4,Maria,True
+21125.2,2127,2155,4282,completed,20,5,Santiago,True
+19334.5,1903,2338,4241,completed,20,6,Isabella,True
+16287.0,2099,1993,4092,completed,20,7,Carlos,True
+54061.0,1938,2031,3969,completed,20,8,Valentina,True
+72517.5,2006,1960,3966,completed,20,9,Andres,True
+187526.1,1756,1982,3738,completed,20,10,Maria,True
+12777.0,2127,2321,4448,completed,20,11,Santiago,True
+16923.8,1903,2035,3938,completed,20,12,Isabella,True
+105342.6,2099,2146,4245,completed,20,13,Carlos,True
+111667.0,1938,1725,3663,completed,20,14,Valentina,True
+12237.4,2006,1910,3916,completed,20,15,Andres,True
+17619.9,1756,2036,3792,completed,20,16,Maria,True
+18427.9,2127,2003,4130,completed,20,17,Santiago,True
+14805.3,1903,2454,4357,completed,20,18,Isabella,True
+254785.8,2099,1677,3776,completed,20,19,Carlos,True
+49102.1,1938,2293,4231,completed,20,20,Valentina,True
+p50=19400 p95=190889,mean=1976,mean=2054,mean=4031 p95=4362,ok,,SUMMARY,N=20,True

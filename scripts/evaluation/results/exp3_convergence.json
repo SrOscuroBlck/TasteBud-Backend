@@ -1,0 +1,188 @@
+{
+  "Carlos — Picante/Umami": [
+    {
+      "session": 1,
+      "e_theta": 0.588235,
+      "var_theta": 0.006971,
+      "tas_5": 0.942523
+    },
+    {
+      "session": 2,
+      "e_theta": 0.627719,
+      "var_theta": 0.005669,
+      "tas_5": 0.848434
+    },
+    {
+      "session": 3,
+      "e_theta": 0.656247,
+      "var_theta": 0.004729,
+      "tas_5": 0.848434
+    },
+    {
+      "session": 4,
+      "e_theta": 0.67335,
+      "var_theta": 0.004083,
+      "tas_5": 0.804873
+    },
+    {
+      "session": 5,
+      "e_theta": 0.686881,
+      "var_theta": 0.003583,
+      "tas_5": 0.803939
+    },
+    {
+      "session": 6,
+      "e_theta": 0.695652,
+      "var_theta": 0.003295,
+      "tas_5": 0.77916
+    },
+    {
+      "session": 7,
+      "e_theta": 0.708447,
+      "var_theta": 0.00292,
+      "tas_5": 0.827646
+    },
+    {
+      "session": 8,
+      "e_theta": 0.719066,
+      "var_theta": 0.002616,
+      "tas_5": 0.848434
+    },
+    {
+      "session": 9,
+      "e_theta": 0.72802,
+      "var_theta": 0.002366,
+      "tas_5": 0.848434
+    },
+    {
+      "session": 10,
+      "e_theta": 0.733217,
+      "var_theta": 0.002177,
+      "tas_5": 0.805209
+    }
+  ],
+  "Valentina — Dulce/Suave": [
+    {
+      "session": 1,
+      "e_theta": 0.564584,
+      "var_theta": 0.00797,
+      "tas_5": 0.788252
+    },
+    {
+      "session": 2,
+      "e_theta": 0.611127,
+      "var_theta": 0.006659,
+      "tas_5": 0.7903
+    },
+    {
+      "session": 3,
+      "e_theta": 0.646263,
+      "var_theta": 0.00564,
+      "tas_5": 0.827539
+    },
+    {
+      "session": 4,
+      "e_theta": 0.665561,
+      "var_theta": 0.00515,
+      "tas_5": 0.768172
+    },
+    {
+      "session": 5,
+      "e_theta": 0.682552,
+      "var_theta": 0.00472,
+      "tas_5": 0.768172
+    },
+    {
+      "session": 6,
+      "e_theta": 0.697626,
+      "var_theta": 0.004341,
+      "tas_5": 0.768172
+    },
+    {
+      "session": 7,
+      "e_theta": 0.719532,
+      "var_theta": 0.003759,
+      "tas_5": 0.785674
+    },
+    {
+      "session": 8,
+      "e_theta": 0.724014,
+      "var_theta": 0.003578,
+      "tas_5": 0.698347
+    },
+    {
+      "session": 9,
+      "e_theta": 0.738122,
+      "var_theta": 0.003185,
+      "tas_5": 0.827539
+    },
+    {
+      "session": 10,
+      "e_theta": 0.750112,
+      "var_theta": 0.00286,
+      "tas_5": 0.799339
+    }
+  ],
+  "Andres — Umami/Graso": [
+    {
+      "session": 1,
+      "e_theta": 0.601616,
+      "var_theta": 0.006791,
+      "tas_5": 0.921316
+    },
+    {
+      "session": 2,
+      "e_theta": 0.663592,
+      "var_theta": 0.004984,
+      "tas_5": 0.926095
+    },
+    {
+      "session": 3,
+      "e_theta": 0.702038,
+      "var_theta": 0.00386,
+      "tas_5": 0.949153
+    },
+    {
+      "session": 4,
+      "e_theta": 0.727765,
+      "var_theta": 0.003121,
+      "tas_5": 0.921316
+    },
+    {
+      "session": 5,
+      "e_theta": 0.748819,
+      "var_theta": 0.002577,
+      "tas_5": 0.953118
+    },
+    {
+      "session": 6,
+      "e_theta": 0.757774,
+      "var_theta": 0.002303,
+      "tas_5": 0.871939
+    },
+    {
+      "session": 7,
+      "e_theta": 0.771256,
+      "var_theta": 0.001979,
+      "tas_5": 0.923967
+    },
+    {
+      "session": 8,
+      "e_theta": 0.781851,
+      "var_theta": 0.001731,
+      "tas_5": 0.924677
+    },
+    {
+      "session": 9,
+      "e_theta": 0.790584,
+      "var_theta": 0.001534,
+      "tas_5": 0.896903
+    },
+    {
+      "session": 10,
+      "e_theta": 0.795138,
+      "var_theta": 0.001419,
+      "tas_5": 0.878045
+    }
+  ]
+}

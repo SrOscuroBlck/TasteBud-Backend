@@ -1,0 +1,151 @@
+condition,run,items_initial,items_filtered,reduction_pct,violations
+Vegano,0,101,31,69.31,0
+Vegano,1,101,31,69.31,0
+Vegano,2,101,31,69.31,0
+Vegano,3,101,31,69.31,0
+Vegano,4,101,31,69.31,0
+Vegano,5,101,31,69.31,0
+Vegano,6,101,31,69.31,0
+Vegano,7,101,31,69.31,0
+Vegano,8,101,31,69.31,0
+Vegano,9,101,31,69.31,0
+Vegano,10,101,31,69.31,0
+Vegano,11,101,31,69.31,0
+Vegano,12,101,31,69.31,0
+Vegano,13,101,31,69.31,0
+Vegano,14,101,31,69.31,0
+Vegano,15,101,31,69.31,0
+Vegano,16,101,31,69.31,0
+Vegano,17,101,31,69.31,0
+Vegano,18,101,31,69.31,0
+Vegano,19,101,31,69.31,0
+Vegano,20,101,31,69.31,0
+Vegano,21,101,31,69.31,0
+Vegano,22,101,31,69.31,0
+Vegano,23,101,31,69.31,0
+Vegano,24,101,31,69.31,0
+Vegano,25,101,31,69.31,0
+Vegano,26,101,31,69.31,0
+Vegano,27,101,31,69.31,0
+Vegano,28,101,31,69.31,0
+Vegano,29,101,31,69.31,0
+Vegano,30,101,31,69.31,0
+Vegano,31,101,31,69.31,0
+Vegano,32,101,31,69.31,0
+Vegano,33,101,31,69.31,0
+Vegano,34,101,31,69.31,0
+Vegano,35,101,31,69.31,0
+Vegano,36,101,31,69.31,0
+Vegano,37,101,31,69.31,0
+Vegano,38,101,31,69.31,0
+Vegano,39,101,31,69.31,0
+Vegano,40,101,31,69.31,0
+Vegano,41,101,31,69.31,0
+Vegano,42,101,31,69.31,0
+Vegano,43,101,31,69.31,0
+Vegano,44,101,31,69.31,0
+Vegano,45,101,31,69.31,0
+Vegano,46,101,31,69.31,0
+Vegano,47,101,31,69.31,0
+Vegano,48,101,31,69.31,0
+Vegano,49,101,31,69.31,0
+Sin gluten,0,101,57,43.56,0
+Sin gluten,1,101,57,43.56,0
+Sin gluten,2,101,57,43.56,0
+Sin gluten,3,101,57,43.56,0
+Sin gluten,4,101,57,43.56,0
+Sin gluten,5,101,57,43.56,0
+Sin gluten,6,101,57,43.56,0
+Sin gluten,7,101,57,43.56,0
+Sin gluten,8,101,57,43.56,0
+Sin gluten,9,101,57,43.56,0
+Sin gluten,10,101,57,43.56,0
+Sin gluten,11,101,57,43.56,0
+Sin gluten,12,101,57,43.56,0
+Sin gluten,13,101,57,43.56,0
+Sin gluten,14,101,57,43.56,0
+Sin gluten,15,101,57,43.56,0
+Sin gluten,16,101,57,43.56,0
+Sin gluten,17,101,57,43.56,0
+Sin gluten,18,101,57,43.56,0
+Sin gluten,19,101,57,43.56,0
+Sin gluten,20,101,57,43.56,0
+Sin gluten,21,101,57,43.56,0
+Sin gluten,22,101,57,43.56,0
+Sin gluten,23,101,57,43.56,0
+Sin gluten,24,101,57,43.56,0
+Sin gluten,25,101,57,43.56,0
+Sin gluten,26,101,57,43.56,0
+Sin gluten,27,101,57,43.56,0
+Sin gluten,28,101,57,43.56,0
+Sin gluten,29,101,57,43.56,0
+Sin gluten,30,101,57,43.56,0
+Sin gluten,31,101,57,43.56,0
+Sin gluten,32,101,57,43.56,0
+Sin gluten,33,101,57,43.56,0
+Sin gluten,34,101,57,43.56,0
+Sin gluten,35,101,57,43.56,0
+Sin gluten,36,101,57,43.56,0
+Sin gluten,37,101,57,43.56,0
+Sin gluten,38,101,57,43.56,0
+Sin gluten,39,101,57,43.56,0
+Sin gluten,40,101,57,43.56,0
+Sin gluten,41,101,57,43.56,0
+Sin gluten,42,101,57,43.56,0
+Sin gluten,43,101,57,43.56,0
+Sin gluten,44,101,57,43.56,0
+Sin gluten,45,101,57,43.56,0
+Sin gluten,46,101,57,43.56,0
+Sin gluten,47,101,57,43.56,0
+Sin gluten,48,101,57,43.56,0
+Sin gluten,49,101,57,43.56,0
+Vegano + Sin gluten,0,101,28,72.28,0
+Vegano + Sin gluten,1,101,28,72.28,0
+Vegano + Sin gluten,2,101,28,72.28,0
+Vegano + Sin gluten,3,101,28,72.28,0
+Vegano + Sin gluten,4,101,28,72.28,0
+Vegano + Sin gluten,5,101,28,72.28,0
+Vegano + Sin gluten,6,101,28,72.28,0
+Vegano + Sin gluten,7,101,28,72.28,0
+Vegano + Sin gluten,8,101,28,72.28,0
+Vegano + Sin gluten,9,101,28,72.28,0
+Vegano + Sin gluten,10,101,28,72.28,0
+Vegano + Sin gluten,11,101,28,72.28,0
+Vegano + Sin gluten,12,101,28,72.28,0
+Vegano + Sin gluten,13,101,28,72.28,0
+Vegano + Sin gluten,14,101,28,72.28,0
+Vegano + Sin gluten,15,101,28,72.28,0
+Vegano + Sin gluten,16,101,28,72.28,0
+Vegano + Sin gluten,17,101,28,72.28,0
+Vegano + Sin gluten,18,101,28,72.28,0
+Vegano + Sin gluten,19,101,28,72.28,0
+Vegano + Sin gluten,20,101,28,72.28,0
+Vegano + Sin gluten,21,101,28,72.28,0
+Vegano + Sin gluten,22,101,28,72.28,0
+Vegano + Sin gluten,23,101,28,72.28,0
+Vegano + Sin gluten,24,101,28,72.28,0
+Vegano + Sin gluten,25,101,28,72.28,0
+Vegano + Sin gluten,26,101,28,72.28,0
+Vegano + Sin gluten,27,101,28,72.28,0
+Vegano + Sin gluten,28,101,28,72.28,0
+Vegano + Sin gluten,29,101,28,72.28,0
+Vegano + Sin gluten,30,101,28,72.28,0
+Vegano + Sin gluten,31,101,28,72.28,0
+Vegano + Sin gluten,32,101,28,72.28,0
+Vegano + Sin gluten,33,101,28,72.28,0
+Vegano + Sin gluten,34,101,28,72.28,0
+Vegano + Sin gluten,35,101,28,72.28,0
+Vegano + Sin gluten,36,101,28,72.28,0
+Vegano + Sin gluten,37,101,28,72.28,0
+Vegano + Sin gluten,38,101,28,72.28,0
+Vegano + Sin gluten,39,101,28,72.28,0
+Vegano + Sin gluten,40,101,28,72.28,0
+Vegano + Sin gluten,41,101,28,72.28,0
+Vegano + Sin gluten,42,101,28,72.28,0
+Vegano + Sin gluten,43,101,28,72.28,0
+Vegano + Sin gluten,44,101,28,72.28,0
+Vegano + Sin gluten,45,101,28,72.28,0
+Vegano + Sin gluten,46,101,28,72.28,0
+Vegano + Sin gluten,47,101,28,72.28,0
+Vegano + Sin gluten,48,101,28,72.28,0
+Vegano + Sin gluten,49,101,28,72.28,0
