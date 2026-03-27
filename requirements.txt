@@ -37,3 +37,4 @@ aiofiles==25.1.0
 # Phase 5: Configuration & Observability
 PyYAML==6.0.1
 prometheus-client==0.19.0  # Optional: for Prometheus metrics
+resend>=2.0.0

@@ -1,8 +1,5 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 from typing import Optional
-from uuid import UUID
 from config.settings import settings
 from utils.logger import setup_logger
 
@@ -11,13 +8,9 @@ logger = setup_logger(__name__)
 
 class EmailService:
     def __init__(self):
-        self.smtp_host = settings.SMTP_HOST
-        self.smtp_port = settings.SMTP_PORT
-        self.smtp_user = settings.SMTP_USER
-        self.smtp_password = settings.SMTP_PASSWORD
-        self.from_email = settings.SMTP_FROM_EMAIL
-        self.from_name = settings.SMTP_FROM_NAME
-    
+        resend.api_key = settings.RESEND_API_KEY
+        self.from_email = settings.EMAIL_FROM
+
     def send_email(
         self,
         to_email: str,
@@ -26,29 +19,20 @@ class EmailService:
         text_body: Optional[str] = None
     ) -> bool:
         try:
-            message = MIMEMultipart("alternative")
-            message["Subject"] = subject
-            message["From"] = f"{self.from_name} <{self.from_email}>"
-            message["To"] = to_email
-            
+            params = {
+                "from": self.from_email,
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+            }
             if text_body:
-                part1 = MIMEText(text_body, "plain")
-                message.attach(part1)
-            
-            part2 = MIMEText(html_body, "html")
-            message.attach(part2)
-            
-            server = smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=30)
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(self.smtp_user, self.smtp_password)
-            server.sendmail(self.from_email, [to_email], message.as_string())
-            server.quit()
-            
+                params["text"] = text_body
+
+            resend.Emails.send(params)
+
             logger.info("Email sent successfully", extra={"to": to_email, "subject": subject})
             return True
-            
+
         except Exception as e:
             logger.error(
                 "Failed to send email",
