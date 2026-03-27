@@ -231,4 +231,167 @@ class EmailService:
 
 
 
+    def send_access_request_confirmation(self, to_email: str) -> bool:
+        subject = "TasteBud — Access Request Received"
+
+        text_body = f"""
+    Hi there!
+
+    We've received your request to join TasteBud.
+
+    Our team will review your request and you'll hear back soon.
+
+    - The TasteBud Team
+    """
+
+        html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #111111; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #111111;">
+            <tr>
+                <td align="center" style="padding: 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #111111;">
+                        <tr>
+                            <td style="padding: 56px 40px 20px 40px; text-align: center;">
+                                <h1 style="margin: 0 0 8px 0; font-size: 38px; font-weight: 700; letter-spacing: -0.5px;">
+                                    <span style="color: #E84A3C;">Taste</span><span style="color: #FF6B4A;">Bud</span>
+                                </h1>
+                                <div style="width: 48px; height: 3px; background: linear-gradient(90deg, #E84A3C, #FF6B4A); margin: 0 auto 40px auto; border-radius: 2px;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0 40px; text-align: center;">
+                                <h2 style="margin: 0 0 8px 0; font-size: 22px; font-weight: 700; color: #F5F5F5; letter-spacing: -0.3px;">Request Received</h2>
+                                <p style="margin: 0 0 32px 0; font-size: 15px; color: #6B7280; line-height: 1.5;">We've received your request to join TasteBud. Our team will review it and you'll hear back soon.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0 32px;">
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px 20px; text-align: center;">
+                                            <p style="margin: 0; font-size: 15px; color: #9CA3AF; line-height: 1.6;">You'll receive another email once your access has been approved.</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px 40px 16px 40px; text-align: center;">
+                                <div style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.06); margin-bottom: 24px;"></div>
+                                <p style="margin: 0 0 4px 0; font-size: 12px; color: #4B5563; line-height: 1.5;">If you didn't request access, you can safely ignore this email.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0 40px 48px 40px; text-align: center;">
+                                <p style="margin: 0; font-size: 13px; font-weight: 500; color: #E84A3C;">Made with &#10084;&#65039; for food lovers</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+        return self.send_email(to_email, subject, html_body, text_body)
+
+    def send_access_request_notification(self, requester_email: str, token: str) -> bool:
+        approve_url = f"{settings.BACKEND_BASE_URL}/api/v1/early-access/approve?token={token}"
+        deny_url = f"{settings.BACKEND_BASE_URL}/api/v1/early-access/deny?token={token}"
+        subject = f"TasteBud Access Request: {requester_email}"
+
+        text_body = f"""
+    New TasteBud access request from: {requester_email}
+
+    Approve: {approve_url}
+    Deny: {deny_url}
+
+    - TasteBud System
+    """
+
+        html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #111111; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #111111;">
+            <tr>
+                <td align="center" style="padding: 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #111111;">
+                        <tr>
+                            <td style="padding: 56px 40px 20px 40px; text-align: center;">
+                                <h1 style="margin: 0 0 8px 0; font-size: 38px; font-weight: 700; letter-spacing: -0.5px;">
+                                    <span style="color: #E84A3C;">Taste</span><span style="color: #FF6B4A;">Bud</span>
+                                </h1>
+                                <div style="width: 48px; height: 3px; background: linear-gradient(90deg, #E84A3C, #FF6B4A); margin: 0 auto 40px auto; border-radius: 2px;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0 40px; text-align: center;">
+                                <h2 style="margin: 0 0 8px 0; font-size: 22px; font-weight: 700; color: #F5F5F5; letter-spacing: -0.3px;">New Access Request</h2>
+                                <p style="margin: 0 0 32px 0; font-size: 15px; color: #6B7280; line-height: 1.5;">Someone wants to join TasteBud</p>
+                            </td>
+                        </tr>
+                        <!-- Requester email -->
+                        <tr>
+                            <td style="padding: 0 32px;">
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px 20px; text-align: center;">
+                                            <p style="margin: 0 0 4px 0; font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">Requester</p>
+                                            <p style="margin: 0; font-size: 18px; font-weight: 600; color: #F5F5F5;">{requester_email}</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <!-- Action buttons -->
+                        <tr>
+                            <td style="padding: 32px 40px 0 40px; text-align: center;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                    <tr>
+                                        <td style="border-radius: 14px; background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); box-shadow: 0 8px 24px rgba(34, 197, 94, 0.25); padding: 0; margin-right: 12px;">
+                                            <a href="{approve_url}" target="_blank" style="display: inline-block; padding: 16px 36px; font-family: 'Inter', -apple-system, sans-serif; font-size: 16px; font-weight: 700; color: #FFFFFF; text-decoration: none; letter-spacing: -0.2px;">Approve</a>
+                                        </td>
+                                        <td style="width: 16px;"></td>
+                                        <td style="border-radius: 14px; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25); padding: 0;">
+                                            <a href="{deny_url}" target="_blank" style="display: inline-block; padding: 16px 36px; font-family: 'Inter', -apple-system, sans-serif; font-size: 16px; font-weight: 700; color: #FFFFFF; text-decoration: none; letter-spacing: -0.2px;">Deny</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <!-- Footer -->
+                        <tr>
+                            <td style="padding: 40px 40px 16px 40px; text-align: center;">
+                                <div style="width: 100%; height: 1px; background: rgba(255, 255, 255, 0.06); margin-bottom: 24px;"></div>
+                                <p style="margin: 0 0 4px 0; font-size: 12px; color: #4B5563; line-height: 1.5;">These links are single-use. Clicking one will invalidate the other.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0 40px 48px 40px; text-align: center;">
+                                <p style="margin: 0; font-size: 13px; font-weight: 500; color: #E84A3C;">TasteBud Admin</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+        return self.send_email(settings.EARLY_ACCESS_ADMIN_EMAIL, subject, html_body, text_body)
+
+
 email_service = EmailService()

@@ -8,6 +8,7 @@ import json
 from models import User, MenuItem
 from models.session import RecommendationSession
 from services.communication.email_service import email_service
+from config.settings import settings
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -118,8 +119,7 @@ class EmailFollowUpService:
         return token_data["session_id"]
     
     def _generate_feedback_link(self, token: str) -> str:
-        base_url = "http://localhost:8010"
-        return f"{base_url}/api/v1/feedback/submit/{token}"
+        return f"{settings.BACKEND_BASE_URL}/api/v1/feedback/submit/{token}"
     
     def _send_post_meal_email_immediately(self, recipient_email: str, context: dict) -> None:
         subject = "How was your meal? ️"

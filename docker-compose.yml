@@ -42,12 +42,21 @@ services:
     environment:
       - TASTEBUD_DATABASE_URL=postgresql+psycopg2://tastebud:tastebud@postgres:5432/tastebud
       - REDIS_URL=redis://redis:6379/0
+      - RATE_LIMIT_REDIS_URL=redis://redis:6379/1
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5-mini}
       - HOST=0.0.0.0
       - PORT=8010
       - DEBUG=true
       - ALLOWED_ORIGINS=*
+      - EARLY_ACCESS_ENABLED=${EARLY_ACCESS_ENABLED:-false}
+      - EARLY_ACCESS_ADMIN_EMAIL=${EARLY_ACCESS_ADMIN_EMAIL:-admin@tastebud-co.com}
+      - EARLY_ACCESS_EXEMPT_EMAIL=${EARLY_ACCESS_EXEMPT_EMAIL:-camargogustavoa@gmail.com}
+      - EARLY_ACCESS_TOKEN_SECRET=${EARLY_ACCESS_TOKEN_SECRET:-change-this-secret}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=${RATE_LIMIT_REQUESTS_PER_MINUTE:-60}
+      - RATE_LIMIT_REQUESTS_PER_HOUR=${RATE_LIMIT_REQUESTS_PER_HOUR:-300}
+      - BACKEND_BASE_URL=${BACKEND_BASE_URL:-http://localhost:8010}
     ports:
       - "8010:8010"
     depends_on:

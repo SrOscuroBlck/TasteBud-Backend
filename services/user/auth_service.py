@@ -5,6 +5,7 @@ import secrets
 from sqlmodel import Session, select
 from models.user import User
 from models.auth import OTPCode, UserSession
+from models.access_request import AccessRequest
 from services.communication.email_service import email_service
 from config.settings import settings
 from utils.logger import setup_logger
@@ -18,12 +19,43 @@ class AuthenticationError(Exception):
 
 class AuthService:
     @staticmethod
-    def request_otp(email: str, db: Session) -> OTPCode:
+    def check_early_access(email: str, db: Session) -> str:
+        """Returns 'allowed', 'pending', 'denied', or 'unknown'."""
+        if not settings.EARLY_ACCESS_ENABLED:
+            return "allowed"
+
+        email = email.lower().strip()
+
+        if settings.EARLY_ACCESS_EXEMPT_EMAIL and email == settings.EARLY_ACCESS_EXEMPT_EMAIL.lower().strip():
+            return "allowed"
+
+        access_req = db.exec(
+            select(AccessRequest).where(AccessRequest.email == email)
+        ).first()
+
+        if access_req is None:
+            return "unknown"
+        if access_req.status == "approved":
+            return "allowed"
+        if access_req.status == "pending":
+            return "pending"
+        if access_req.status == "denied":
+            return "denied"
+
+        return "unknown"
+
+    @staticmethod
+    def request_otp(email: str, db: Session):
         if not email or "@" not in email:
             raise ValueError("email must be a valid email address")
-        
+
         email = email.lower().strip()
-        
+
+        # Early-access gate (no-op when EARLY_ACCESS_ENABLED=False)
+        access_status = AuthService.check_early_access(email, db)
+        if access_status != "allowed":
+            return access_status
+
         user = db.exec(select(User).where(User.email == email)).first()
         if not user:
             user = User(email=email, email_verified=False, onboarding_completed=False)
@@ -41,10 +73,6 @@ class AuthService:
         
         if existing_otp:
             if existing_otp.is_valid():
-                logger.warning(
-                    f"OTP CODE FOR TESTING: {existing_otp.code}",
-                    extra={"user_id": str(user.id), "email": email, "otp_code": existing_otp.code}
-                )
                 email_sent = email_service.send_otp_code(user.email, existing_otp.code)
                 if not email_sent:
                     raise AuthenticationError("Failed to send OTP email")
@@ -61,18 +89,6 @@ class AuthService:
         db.add(otp)
         db.commit()
         db.refresh(otp)
-        
-        logger.warning(
-            f"OTP CODE FOR TESTING: {otp.code}",
-            extra={"user_id": str(user.id), "email": email, "otp_code": otp.code}
-        )
-        
-        email_sent = email_service.send_otp_code(user.email, otp.code)
-        if not email_sent:
-            raise AuthenticationError("Failed to send OTP email")
-        
-        logger.info("OTP generated and sent", extra={"user_id": str(user.id), "email": email})
-        return otp
         
         email_sent = email_service.send_otp_code(user.email, otp.code)
         if not email_sent:
@@ -145,6 +161,19 @@ class AuthService:
         db.commit()
         db.refresh(session)
         
+        # Cache email in Redis for rate limiter lookup
+        try:
+            from utils.redis_client import get_redis
+            r = get_redis()
+            if r:
+                r.setex(
+                    f"token_email:{access_token}",
+                    settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                    email,
+                )
+        except Exception:
+            pass  # fail open — rate limiter falls back to IP
+
         logger.info("OTP verified successfully", extra={"user_id": str(user.id), "email": email})
         return session
     

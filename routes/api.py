@@ -1,5 +1,6 @@
 from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from fastapi.responses import JSONResponse
 from typing import Dict, Any, List, Optional
 from uuid import UUID
 from pydantic import BaseModel
@@ -66,11 +67,23 @@ class RefreshTokenBody(BaseModel):
 @router.post("/auth/request-otp")
 def request_otp(body: RequestOTPBody, session: Session = Depends(get_session)):
     try:
-        otp = auth_service.request_otp(body.email, session)
+        result = auth_service.request_otp(body.email, session)
+
+        # Early-access gating: string means not yet allowed
+        if isinstance(result, str):
+            status_map = {
+                "unknown": ("access_required", "You need to request early access first."),
+                "pending": ("access_pending", "Your access request is being reviewed."),
+                "denied": ("access_denied", "Your access request was not approved."),
+            }
+            status, message = status_map.get(result, ("access_required", "Access not granted."))
+            return JSONResponse(status_code=403, content={"status": status, "message": message})
+
+        # Normal flow: OTP was sent
         return {
             "success": True,
             "message": "OTP sent to email",
-            "expires_at": otp.expires_at.isoformat()
+            "expires_at": result.expires_at.isoformat()
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

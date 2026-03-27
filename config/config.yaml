@@ -29,6 +29,20 @@ otp:
   expire_minutes: 10
   max_attempts: 3
 
+## Early Access Configuration
+early_access:
+  enabled: false
+  admin_email: "${EARLY_ACCESS_ADMIN_EMAIL}"
+  exempt_email: "${EARLY_ACCESS_EXEMPT_EMAIL}"
+  token_secret: "${EARLY_ACCESS_TOKEN_SECRET}"
+
+## Rate Limiting Configuration
+rate_limit:
+  enabled: true
+  redis_url: "${RATE_LIMIT_REDIS_URL}"
+  requests_per_minute: 60
+  requests_per_hour: 300
+
 ## Onboarding Configuration
 onboarding:
   max_questions: 7

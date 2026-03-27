@@ -67,7 +67,22 @@ class Settings:
     # OTP
     OTP_EXPIRE_MINUTES: int = int(os.getenv("OTP_EXPIRE_MINUTES", "10"))
     OTP_MAX_ATTEMPTS: int = int(os.getenv("OTP_MAX_ATTEMPTS", "3"))
-    
+
+    # Early Access
+    EARLY_ACCESS_ENABLED: bool = os.getenv("EARLY_ACCESS_ENABLED", "False").lower() == "true"
+    EARLY_ACCESS_ADMIN_EMAIL: str = os.getenv("EARLY_ACCESS_ADMIN_EMAIL", "admin@tastebud-co.com")
+    EARLY_ACCESS_EXEMPT_EMAIL: str = os.getenv("EARLY_ACCESS_EXEMPT_EMAIL", "camargogustavoa@gmail.com")
+    EARLY_ACCESS_TOKEN_SECRET: str = os.getenv("EARLY_ACCESS_TOKEN_SECRET", "change-this-secret")
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = os.getenv("RATE_LIMIT_ENABLED", "True").lower() == "true"
+    RATE_LIMIT_REDIS_URL: str = os.getenv("RATE_LIMIT_REDIS_URL", "redis://localhost:6379/1")
+    RATE_LIMIT_REQUESTS_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_REQUESTS_PER_MINUTE", "60"))
+    RATE_LIMIT_REQUESTS_PER_HOUR: int = int(os.getenv("RATE_LIMIT_REQUESTS_PER_HOUR", "300"))
+
+    # Backend base URL (for email links pointing to API endpoints)
+    BACKEND_BASE_URL: str = os.getenv("BACKEND_BASE_URL", "http://localhost:8010")
+
     # Phase 3: Query-based recommendations
     QUERY_RETRIEVAL_CANDIDATES_MULTIPLIER: int = int(os.getenv("QUERY_RETRIEVAL_CANDIDATES_MULTIPLIER", "3"))
     QUERY_DEFAULT_DIVERSITY_WEIGHT: float = float(os.getenv("QUERY_DEFAULT_DIVERSITY_WEIGHT", "0.3"))

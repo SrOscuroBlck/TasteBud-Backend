@@ -10,6 +10,7 @@ from routes.ingestion import router as ingestion_router
 from routes.sessions import router as sessions_router
 from routes.feedback import router as feedback_router
 from routes.admin_rebuild import router as admin_rebuild_router
+from routes.early_access import router as early_access_router
 # from routes.recommendation_session import router as recommendation_session_router
 from services.features.faiss_service import FAISSService
 from scripts.migrations.migrate_add_permanently_excluded_items import add_permanently_excluded_items_column
@@ -18,6 +19,7 @@ from scripts.migrations.migrate_add_feedback_indexes import add_feedback_perform
 from scripts.migrations.migrate_add_course_cuisine import add_course_and_cuisine_columns
 from scripts.migrations.migrate_add_ingredient_penalties import add_ingredient_penalties_column
 from scripts.migrations.migrate_add_onboarding_choices import add_onboarding_choices_column
+from scripts.migrations.add_access_request_table import add_access_request_table
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -44,7 +46,8 @@ async def lifespan(app: FastAPI):
     add_course_and_cuisine_columns()  # Add meal type filtering columns
     add_ingredient_penalties_column()
     add_onboarding_choices_column()
-    
+    add_access_request_table()
+
     # Load FAISS index for similarity search
     faiss_service = FAISSService()
     index_loaded = False
@@ -83,11 +86,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Middleware execution order (outermost first): CorrelationId → RateLimit → RequestTiming → handler
+# Starlette reverses add_middleware order, so add in reverse.
+from middleware.logging_middleware import CorrelationIdMiddleware, RequestTimingMiddleware
+from middleware.rate_limit_middleware import RateLimitMiddleware
+
+app.add_middleware(RequestTimingMiddleware)
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(CorrelationIdMiddleware)
+
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(ingestion_router, prefix="/api/v1")
 app.include_router(sessions_router, prefix="/api/v1")
 app.include_router(feedback_router, prefix="/api/v1")
 app.include_router(admin_rebuild_router, prefix="/api/v1")
+app.include_router(early_access_router, prefix="/api/v1")
 # app.include_router(recommendation_session_router, prefix="/api/v1")
 
 STATIC_DIR = Path(__file__).parent / "static"

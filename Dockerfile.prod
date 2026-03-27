@@ -1,0 +1,38 @@
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    poppler-utils \
+    tesseract-ocr \
+    libtesseract-dev \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright browsers + OS-level deps
+RUN playwright install --with-deps chromium
+
+# Create non-root user
+RUN groupadd -r tastebud && useradd -r -g tastebud -d /app tastebud
+
+# Copy application code
+COPY . .
+
+# Create required directories
+RUN mkdir -p /app/data/faiss_indexes /app/uploads/menus /app/static \
+    && chown -R tastebud:tastebud /app
+
+USER tastebud
+
+EXPOSE 8010
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8010"]
