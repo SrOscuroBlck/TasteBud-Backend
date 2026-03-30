@@ -38,15 +38,22 @@ class ExplanationEnhancementService:
         if context_fit:
             parts.append(context_fit)
         
+        lang = getattr(user, "preferred_language", "en")
         if not parts:
-            parts.append(f"{item.name} looks great!")
-        
+            if lang == "es":
+                parts.append(f"¡{item.name} se ve genial!")
+            else:
+                parts.append(f"{item.name} looks great!")
+
         explanation = " ".join(parts)
-        
+
         explanation = self._add_personality(explanation, context.user_experience_level)
-        
+
         if confidence < 0.7 and context.user_experience_level == "new":
-            explanation += " We're still learning your taste, so let us know what you think!"
+            if lang == "es":
+                explanation += " Aún estamos aprendiendo tus gustos, ¡cuéntanos qué te parece!"
+            else:
+                explanation += " We're still learning your taste, so let us know what you think!"
         
         return explanation
     

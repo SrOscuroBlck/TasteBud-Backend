@@ -150,7 +150,8 @@ class PersonalizedExplanationService:
         item = ranked_item.item
         ranking_factors = ranked_item.ranking_factors
         
-        system_prompt = self._build_system_prompt()
+        lang = getattr(user, "preferred_language", "en")
+        system_prompt = self._build_system_prompt(language=lang)
         user_prompt = self._build_user_prompt(
             item, user, user_history, ranking_factors, context
         )
@@ -192,7 +193,24 @@ class PersonalizedExplanationService:
             
             return self._generate_fallback_explanation(item, user, user_history)
     
-    def _build_system_prompt(self) -> str:
+    def _build_system_prompt(self, language: str = "en") -> str:
+        if language == "es":
+            return """Eres un asistente de recomendación gastronómica que crea explicaciones personalizadas y concisas para recomendaciones de platos del menú.
+
+Tus explicaciones deben:
+- Ser de 1-2 oraciones máximo (15-25 palabras en total)
+- Hacer referencia a las preferencias e historial del usuario cuando sea relevante
+- Ser conversacionales y naturales
+- Comenzar con el nombre del plato o una referencia directa a él
+- Explicar POR QUÉ este plato coincide con el gusto del usuario
+
+Ejemplos:
+- "El Spicy Tuna Roll combina con tu amor por los sabores intensos y umami, similar al Pad Thai que pediste la semana pasada."
+- "Esta cremosa Carbonara se alinea con tu preferencia por platos italianos ricos y sustanciosos."
+- "La Pizza Margherita es una opción clásica para tu paladar equilibrado, con las notas de albahaca fresca que disfrutas."
+
+IMPORTANTE: Responde siempre en español.
+"""
         return """You are a food recommendation assistant that creates personalized, concise explanations for menu item recommendations.
 
 Your explanations should:
@@ -272,8 +290,12 @@ Examples:
             prompt_parts.append(f"Why recommended: {', '.join(key_factors)}")
         
         prompt = "\n".join(prompt_parts)
-        prompt += "\n\nGenerate a personalized 1-2 sentence explanation (15-25 words) for why this dish is recommended."
-        
+        lang = getattr(user, "preferred_language", "en")
+        if lang == "es":
+            prompt += "\n\nGenera una explicación personalizada de 1-2 oraciones (15-25 palabras) de por qué se recomienda este plato. Responde en español."
+        else:
+            prompt += "\n\nGenerate a personalized 1-2 sentence explanation (15-25 words) for why this dish is recommended."
+
         return prompt
     
     def _generate_fallback_explanation(
@@ -282,16 +304,29 @@ Examples:
         user: User,
         user_history: UserHistory
     ) -> str:
+        lang = getattr(user, "preferred_language", "en")
+        if lang == "es":
+            if user_history.favorite_taste_axes:
+                axes_str = " y ".join(user_history.favorite_taste_axes[:2])
+                return f"{item.name} combina con tu preferencia por sabores {axes_str}."
+            if user_history.frequently_ordered_cuisines:
+                cuisine = user_history.frequently_ordered_cuisines[0]
+                return f"{item.name} se recomienda por tu gusto por la cocina {cuisine}."
+            if item.cuisine:
+                cuisine_str = ", ".join(item.cuisine[:2])
+                return f"{item.name} ofrece excelentes sabores de cocina {cuisine_str} que podrías disfrutar."
+            return f"{item.name} se recomienda según tu perfil de gustos."
+
         if user_history.favorite_taste_axes:
             axes_str = " and ".join(user_history.favorite_taste_axes[:2])
             return f"{item.name} matches your preference for {axes_str} flavors."
-        
+
         if user_history.frequently_ordered_cuisines:
             cuisine = user_history.frequently_ordered_cuisines[0]
             return f"{item.name} is recommended based on your love for {cuisine} cuisine."
-        
+
         if item.cuisine:
             cuisine_str = ", ".join(item.cuisine[:2])
             return f"{item.name} offers great {cuisine_str} flavors you might enjoy."
-        
+
         return f"{item.name} is recommended based on your taste profile."

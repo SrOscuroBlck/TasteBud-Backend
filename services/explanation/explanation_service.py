@@ -290,6 +290,9 @@ class ExplanationService:
         )
         top_preferences = [k for k, v in user_sorted[:3]]
         
+        lang = getattr(user, "preferred_language", "en")
+        lang_instruction = "Respond in Spanish." if lang == "es" else "Respond in English."
+
         prompt = f"""Generate a brief 1-sentence explanation (max 15 words) for why we recommended this dish to the user.
 
 Dish: {item.name}
@@ -299,7 +302,7 @@ Ingredients: {', '.join(item.ingredients[:5]) if item.ingredients else 'N/A'}
 User preferences: {', '.join(top_preferences)}
 User dietary: {', '.join(user.dietary_rules) if user.dietary_rules else 'None'}
 
-Make it personal and specific. Start with the dish name."""
+Make it personal and specific. Start with the dish name. {lang_instruction}"""
         
         try:
             response = _client().chat.completions.create(

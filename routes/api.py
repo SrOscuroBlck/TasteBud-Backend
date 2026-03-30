@@ -245,6 +245,7 @@ def get_profile(
         "taste_uncertainty": current_user.taste_uncertainty,
         "cuisine_affinity": current_user.cuisine_affinity,
         "onboarding_completed": current_user.onboarding_completed,
+        "preferred_language": current_user.preferred_language,
     }
 
 
@@ -261,6 +262,11 @@ def update_prefs(
     for k in ["allergies", "dietary_rules", "liked_ingredients", "disliked_ingredients"]:
         if k in payload:
             setattr(current_user, k, payload[k])
+    if "preferred_language" in payload:
+        lang = payload["preferred_language"]
+        if lang not in ("en", "es"):
+            raise HTTPException(400, "preferred_language must be 'en' or 'es'")
+        current_user.preferred_language = lang
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
@@ -268,6 +274,23 @@ def update_prefs(
     return {"success": True}
     session.commit()
     return {"status": "ok"}
+
+
+@router.patch("/users/me/language")
+def update_language(
+    payload: Dict[str, Any],
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    lang = payload.get("preferred_language")
+    if lang not in ("en", "es"):
+        raise HTTPException(400, "preferred_language must be 'en' or 'es'")
+    current_user.preferred_language = lang
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+    logger.info("Updated user language", extra={"user_id": str(current_user.id), "language": lang})
+    return {"preferred_language": current_user.preferred_language}
 
 
 @router.post("/restaurants/{restaurant_id}/menu/ingest")

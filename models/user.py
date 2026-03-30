@@ -71,5 +71,7 @@ class User(SQLModel, table=True):
     
     permanently_excluded_items: List[str] = Field(default_factory=list, sa_column=Column(JSON))
 
+    preferred_language: str = Field(default="en")
+
     onboarding_choices: List[Dict] = Field(default_factory=list, sa_column=Column(JSON))
     onboarding_state: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
