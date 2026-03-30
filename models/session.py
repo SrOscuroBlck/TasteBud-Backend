@@ -57,6 +57,8 @@ class RecommendationSession(SQLModel, table=True):
     active_composition_id: Optional[str] = None
     composition_validation_state: Dict = Field(default_factory=dict, sa_column=Column(JSON))  # Temp cache: {course: {item_id, status}}
     
+    pending_partial_regen: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
+
     user_experience_level: str = "learning"
     context_snapshot: Dict = Field(default_factory=dict, sa_column=Column(JSON))
     

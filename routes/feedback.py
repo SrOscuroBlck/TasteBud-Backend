@@ -62,7 +62,7 @@ def get_pending_feedback(
             pending_feedback.append({
                 "session_id": str(rec_session.id),
                 "restaurant_id": str(rec_session.restaurant_id),
-                "meal_intent": rec_session.meal_intent.value,
+                "meal_intent": rec_session.meal_intent.value if hasattr(rec_session.meal_intent, 'value') else rec_session.meal_intent,
                 "completed_at": rec_session.completed_at.isoformat() if rec_session.completed_at else None
             })
     
@@ -196,7 +196,7 @@ def get_feedback_form(
     return {
         "already_submitted": False,
         "session_id": str(rec_session.id),
-        "meal_intent": rec_session.meal_intent.value,
+        "meal_intent": rec_session.meal_intent.value if hasattr(rec_session.meal_intent, 'value') else rec_session.meal_intent,
         "selected_items": selected_items,
         "completed_at": rec_session.completed_at.isoformat() if rec_session.completed_at else None
     }

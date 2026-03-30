@@ -277,6 +277,42 @@ class RecommendationSessionService:
             }
         )
     
+    def set_pending_partial_regeneration(
+        self,
+        db_session: Session,
+        session_id: UUID,
+        accepted: Dict,
+        rejected: list
+    ) -> None:
+        """Store which courses are accepted/rejected for partial regeneration."""
+        session = self.get_session(db_session, session_id)
+        session.pending_partial_regen = {
+            "accepted": accepted,
+            "rejected": rejected,
+        }
+        flag_modified(session, "pending_partial_regen")
+        db_session.add(session)
+
+        logger.info(
+            "Pending partial regeneration set",
+            extra={
+                "session_id": str(session_id),
+                "accepted_courses": list(accepted.keys()),
+                "rejected_courses": rejected,
+            }
+        )
+
+    def clear_pending_partial_regeneration(
+        self,
+        db_session: Session,
+        session_id: UUID,
+    ) -> None:
+        """Clear partial regeneration state (used for regenerate_all)."""
+        session = self.get_session(db_session, session_id)
+        session.pending_partial_regen = None
+        flag_modified(session, "pending_partial_regen")
+        db_session.add(session)
+
     def _detect_time_of_day(self, hour: int) -> str:
         if 6 <= hour < 11:
             return "morning"

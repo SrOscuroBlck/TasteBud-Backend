@@ -231,7 +231,11 @@ FULL_MEAL_SYSTEM_PROMPT = (
     "with similar flavor profiles to rejected ones. Only include them if no better alternatives exist.\n"
     "6. Consider flavor progression (light→rich, mild→bold, etc.)\n"
     "7. Stay within budget if specified (sum of 3 items)\n"
-    "8. Each composition should be DIFFERENT from the others\n\n"
+    "8. Each composition should be DIFFERENT from the others\n"
+    "9. COURSE CONSTRAINT: appetizer_id MUST be an item whose course is appetizer/starter/salad/soup. "
+    "main_id MUST be an item whose course is main/entree/dinner. "
+    "dessert_id MUST be an item whose course is dessert/sweet. "
+    "NEVER place an item in a mismatched course slot.\n\n"
     "Return ONLY a JSON object (no markdown, no explanation outside JSON):\n"
     "{\n"
     '  "compositions": [\n'
@@ -371,6 +375,20 @@ def rerank_single_items(
     return validated[:top_n]
 
 
+_COURSE_SLOT_KEYWORDS: dict[str, list[str]] = {
+    "appetizer": ["appetizer", "starter", "salad", "soup"],
+    "main": ["main", "entree", "dinner"],
+    "dessert": ["dessert", "sweet"],
+}
+
+
+def _matches_course_slot(course_str: str, slot: str) -> bool:
+    """Check if an item's course string matches the expected meal slot."""
+    course_lower = (course_str or "").lower()
+    keywords = _COURSE_SLOT_KEYWORDS.get(slot, [])
+    return any(kw in course_lower for kw in keywords)
+
+
 def compose_full_meal(
     candidates: list[MenuItem],
     user: User,
@@ -386,6 +404,16 @@ def compose_full_meal(
         return []
 
     trimmed = candidates[:MAX_CANDIDATES_FOR_LLM]
+
+    # Log course distribution so we can diagnose empty composition issues
+    course_dist: dict[str, int] = {}
+    for item in trimmed:
+        slot = "unknown"
+        for s in ("appetizer", "main", "dessert"):
+            if _matches_course_slot(item.course, s):
+                slot = s
+                break
+        course_dist[slot] = course_dist.get(slot, 0) + 1
 
     user_block = _build_user_profile_block(user)
     onboarding_block = _build_onboarding_block(user)
@@ -434,6 +462,7 @@ def compose_full_meal(
             "num_compositions": num_compositions,
             "items_shown_count": len(items_shown or []),
             "mode": "full_meal",
+            "course_distribution": course_dist,
         },
     )
 
@@ -465,9 +494,20 @@ def compose_full_meal(
 
     compositions_raw = data.get("compositions", [])
     if not compositions_raw:
-        raise LLMRecommendationError("LLM returned empty compositions")
+        logger.error(
+            "LLM returned empty compositions",
+            extra={
+                "session_id": str(rec_session.id),
+                "raw_response": raw[:500],
+                "course_distribution": course_dist,
+            },
+        )
+        raise LLMRecommendationError(
+            f"LLM returned empty compositions (candidates had courses: {course_dist})"
+        )
 
     candidate_ids = {str(item.id) for item in trimmed}
+    candidate_lookup = {str(item.id): item for item in trimmed}
     validated: list[dict[str, Any]] = []
 
     for comp in compositions_raw:
@@ -476,16 +516,37 @@ def compose_full_meal(
         dessert_id = str(comp.get("dessert_id", ""))
         reasoning = comp.get("meal_reasoning", "")
 
-        if app_id in candidate_ids and main_id in candidate_ids and dessert_id in candidate_ids:
-            validated.append({
-                "appetizer_id": app_id,
-                "main_id": main_id,
-                "dessert_id": dessert_id,
-                "meal_reasoning": reasoning,
-            })
+        if not (app_id in candidate_ids and main_id in candidate_ids and dessert_id in candidate_ids):
+            continue
+
+        app_item = candidate_lookup[app_id]
+        main_item = candidate_lookup[main_id]
+        dessert_item = candidate_lookup[dessert_id]
+
+        if not (
+            _matches_course_slot(app_item.course, "appetizer")
+            and _matches_course_slot(main_item.course, "main")
+            and _matches_course_slot(dessert_item.course, "dessert")
+        ):
+            logger.warning(
+                "Skipped LLM composition with mismatched course slots",
+                extra={
+                    "appetizer": f"{app_item.name} (course={app_item.course})",
+                    "main": f"{main_item.name} (course={main_item.course})",
+                    "dessert": f"{dessert_item.name} (course={dessert_item.course})",
+                },
+            )
+            continue
+
+        validated.append({
+            "appetizer_id": app_id,
+            "main_id": main_id,
+            "dessert_id": dessert_id,
+            "meal_reasoning": reasoning,
+        })
 
     if not validated:
-        raise LLMRecommendationError("LLM meal compositions contained invalid item IDs")
+        raise LLMRecommendationError("LLM meal compositions contained invalid item IDs or mismatched courses")
 
     logger.info(
         "LLM meal composition completed",
@@ -493,6 +554,225 @@ def compose_full_meal(
             "user_id": str(user.id),
             "session_id": str(rec_session.id),
             "compositions_requested": num_compositions,
+            "compositions_valid": len(validated),
+        },
+    )
+
+    return validated
+
+
+PARTIAL_MEAL_SYSTEM_PROMPT = (
+    "You are a food recommendation engine specializing in composing complete meals. "
+    "The user has ALREADY ACCEPTED some courses from a previous meal composition. "
+    "You must KEEP the accepted items exactly as they are and ONLY choose new items for the rejected courses.\n\n"
+    "LOCKED ITEMS (do NOT change these):\n{locked_items}\n\n"
+    "You must compose {num_compositions} meal(s) where the locked items stay in their slots "
+    "and you ONLY fill the open slots from the candidates.\n\n"
+    "Composition criteria:\n"
+    "1. The new items should complement the locked items — consider flavor harmony\n"
+    "2. Match the user's taste profile\n"
+    "3. Respect onboarding choices and in-session feedback\n"
+    "4. Avoid items the user previously rejected\n"
+    "5. COURSE CONSTRAINT: appetizer_id MUST be appetizer/starter/salad/soup. "
+    "main_id MUST be main/entree/dinner. dessert_id MUST be dessert/sweet.\n\n"
+    "Return ONLY a JSON object (no markdown, no explanation outside JSON):\n"
+    "{{\n"
+    '  "compositions": [\n'
+    "    {{\n"
+    '      "appetizer_id": "<uuid>",\n'
+    '      "main_id": "<uuid>",\n'
+    '      "dessert_id": "<uuid>",\n'
+    '      "meal_reasoning": "<2 sentences — warm, conversational, explaining WHY these work together>"\n'
+    "    }}\n"
+    "  ]\n"
+    "}}\n"
+    "For locked slots, use the EXACT item ID provided. For open slots, choose from the candidates. "
+    "Each item may appear in at most one composition."
+)
+
+
+def compose_partial_meal_llm(
+    candidates: list[MenuItem],
+    user: User,
+    rec_session: RecommendationSession,
+    feedback_list: list[RecommendationFeedback],
+    items_map: dict[str, MenuItem],
+    accepted: dict[str, str],
+    rejected: list[str],
+    num_compositions: int = 3,
+    interaction_history: Dict[UUID, UserItemInteractionHistory] | None = None,
+    items_shown: list[str] | None = None,
+    order_history: list[UserOrderHistory] | None = None,
+) -> list[dict[str, Any]]:
+    """Compose meals keeping accepted courses locked and only replacing rejected ones."""
+    if not candidates:
+        return []
+
+    # Filter candidates to only include items matching rejected course slots
+    filtered_candidates = [
+        item for item in candidates
+        if any(_matches_course_slot(item.course, slot) for slot in rejected)
+    ]
+
+    # Also include accepted items so the LLM can reference them
+    accepted_item_ids = set(accepted.values())
+    for item in candidates:
+        if str(item.id) in accepted_item_ids and item not in filtered_candidates:
+            filtered_candidates.append(item)
+
+    trimmed = filtered_candidates[:MAX_CANDIDATES_FOR_LLM]
+
+    # Build locked items description
+    locked_lines = []
+    for course, item_id in accepted.items():
+        item = items_map.get(item_id)
+        if item:
+            locked_lines.append(f"- {course}: ID:{item.id} \"{item.name}\" (KEEP THIS)")
+        else:
+            locked_lines.append(f"- {course}: ID:{item_id} (KEEP THIS)")
+    locked_items_str = "\n".join(locked_lines) if locked_lines else "None"
+
+    user_block = _build_user_profile_block(user)
+    onboarding_block = _build_onboarding_block(user)
+    feedback_block = _build_session_feedback_block(feedback_list, items_map)
+    dislike_history_block = _build_dislike_history_block(interaction_history or {}, items_map)
+    shown_items_block = _build_shown_items_block(items_shown or [], items_map)
+    order_history_block = _build_order_history_block(order_history or [], items_map)
+    context_block = _build_context_block(rec_session)
+    candidate_block = _build_candidate_block(trimmed)
+
+    user_prompt_parts = [
+        "## User Profile",
+        user_block,
+    ]
+    if onboarding_block:
+        user_prompt_parts += ["", "## Onboarding History", onboarding_block]
+    if order_history_block:
+        user_prompt_parts += ["", "## Previous Orders at This Restaurant", order_history_block]
+    if dislike_history_block:
+        user_prompt_parts += ["", "## Past Rejection History", dislike_history_block]
+    if shown_items_block:
+        user_prompt_parts += ["", "## Items Already Shown This Session", shown_items_block]
+    if feedback_block:
+        user_prompt_parts += ["", "## Session Feedback", feedback_block]
+    user_prompt_parts += [
+        "",
+        "## Context",
+        context_block,
+        "",
+        "## Candidates (for open slots only)",
+        candidate_block,
+        "",
+        f"Compose {num_compositions} meal(s). Keep locked items in their slots. "
+        f"Only replace these courses: {', '.join(rejected)}. Return valid JSON only.",
+    ]
+    user_prompt = "\n".join(user_prompt_parts)
+
+    system_prompt = PARTIAL_MEAL_SYSTEM_PROMPT.format(
+        locked_items=locked_items_str,
+        num_compositions=str(num_compositions),
+    )
+    client = _openai_client()
+
+    logger.info(
+        "LLM partial meal composition request",
+        extra={
+            "user_id": str(user.id),
+            "session_id": str(rec_session.id),
+            "candidate_count": len(trimmed),
+            "accepted_courses": list(accepted.keys()),
+            "rejected_courses": rejected,
+            "mode": "partial_meal",
+        },
+    )
+
+    try:
+        response = client.responses.create(
+            model=settings.OPENAI_MODEL,
+            instructions=system_prompt,
+            input=user_prompt,
+            reasoning={"effort": REASONING_EFFORT},
+            text={"format": {"type": "json_object"}},
+        )
+    except Exception as exc:
+        raise LLMRecommendationError(f"OpenAI API call failed: {exc}") from exc
+
+    raw = response.output_text or ""
+    cleaned = _strip_markdown_fences(raw)
+
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError as exc:
+        logger.error("LLM returned invalid JSON for partial meal", extra={"raw_response": raw[:500]})
+        raise LLMRecommendationError("LLM returned invalid JSON for partial meal composition") from exc
+
+    compositions_raw = data.get("compositions", [])
+    if not compositions_raw:
+        raise LLMRecommendationError("LLM returned empty partial compositions")
+
+    # Build lookup including accepted items
+    all_valid_ids = {str(item.id) for item in trimmed} | accepted_item_ids
+    candidate_lookup = {str(item.id): item for item in trimmed}
+    # Also add accepted items to lookup from items_map
+    for item_id in accepted_item_ids:
+        if item_id not in candidate_lookup and item_id in items_map:
+            candidate_lookup[item_id] = items_map[item_id]
+
+    validated: list[dict[str, Any]] = []
+
+    for comp in compositions_raw:
+        app_id = str(comp.get("appetizer_id", ""))
+        main_id = str(comp.get("main_id", ""))
+        dessert_id = str(comp.get("dessert_id", ""))
+        reasoning = comp.get("meal_reasoning", "")
+
+        if not (app_id in all_valid_ids and main_id in all_valid_ids and dessert_id in all_valid_ids):
+            continue
+
+        # Verify accepted courses have correct locked item IDs
+        valid = True
+        for course, expected_id in accepted.items():
+            slot_map = {"appetizer": app_id, "main": main_id, "dessert": dessert_id}
+            if slot_map.get(course) != expected_id:
+                logger.warning(
+                    "LLM changed a locked item in partial composition",
+                    extra={"course": course, "expected": expected_id, "got": slot_map.get(course)},
+                )
+                valid = False
+                break
+        if not valid:
+            continue
+
+        # Verify course type matching for replaced slots
+        for slot in rejected:
+            slot_map = {"appetizer": app_id, "main": main_id, "dessert": dessert_id}
+            item_id = slot_map.get(slot)
+            if item_id and item_id in candidate_lookup:
+                if not _matches_course_slot(candidate_lookup[item_id].course, slot):
+                    logger.warning(
+                        "Skipped partial composition with mismatched course",
+                        extra={"slot": slot, "item": candidate_lookup[item_id].name, "course": candidate_lookup[item_id].course},
+                    )
+                    valid = False
+                    break
+        if not valid:
+            continue
+
+        validated.append({
+            "appetizer_id": app_id,
+            "main_id": main_id,
+            "dessert_id": dessert_id,
+            "meal_reasoning": reasoning,
+        })
+
+    if not validated:
+        raise LLMRecommendationError("LLM partial meal compositions contained invalid items or mismatched courses")
+
+    logger.info(
+        "LLM partial meal composition completed",
+        extra={
+            "user_id": str(user.id),
+            "session_id": str(rec_session.id),
             "compositions_valid": len(validated),
         },
     )

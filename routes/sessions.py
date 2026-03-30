@@ -3,11 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
 from uuid import UUID
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, select
 from datetime import datetime
 from config.database import get_session
-from models import User
+from models import User, MenuItem
 from models.session import MealIntent, FeedbackType
+from services.context.context_enhancement_service import ContextEnhancementService
 from services.core.session_service import RecommendationSessionService
 from services.core.recommendation_service import RecommendationService
 from services.ml.llm_reranking_service import LLMRecommendationError
@@ -106,14 +107,28 @@ def start_session(
     if not request.meal_intent:
         raise HTTPException(status_code=400, detail="meal_intent is required to start session")
     
+    menu_items = db.exec(
+        select(MenuItem).where(MenuItem.restaurant_id == request.restaurant_id)
+    ).all()
+    available_intents = ContextEnhancementService().get_available_intents(list(menu_items))
+    if request.meal_intent not in available_intents:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "intent_not_available",
+                "message": f"'{request.meal_intent.value}' is not available for this restaurant",
+                "available_intents": [i.value for i in available_intents]
+            }
+        )
+
     session_service = RecommendationSessionService()
-    
+
     visit_history = session_service.get_restaurant_visit_history(
         db_session=db,
         user_id=current_user.id,
         restaurant_id=request.restaurant_id
     )
-    
+
     session_id = session_service.start_session(
         db_session=db,
         user_id=current_user.id,
@@ -347,10 +362,9 @@ def add_composition_feedback(
     if rec_session.meal_intent != "full_meal":
         raise HTTPException(status_code=400, detail="Composition feedback only available for full_meal intent")
     
-    # Get the composition from session context to extract item IDs  
     if not rec_session.active_composition_id or rec_session.active_composition_id != request.composition_id:
         raise HTTPException(status_code=400, detail="Composition not found or no longer active")
-    
+
     validation_state = rec_session.composition_validation_state.get(request.composition_id, {})
     if not validation_state:
         raise HTTPException(status_code=400, detail="Composition validation state not found")
@@ -422,14 +436,17 @@ def add_composition_feedback(
         response_data["next_action"] = "complete_session"
         
     elif request.composition_action == "regenerate_all":
+        session_service.clear_pending_partial_regeneration(db, session_id)
+        db.commit()
         response_data["message"] = "Generating completely new recommendations..."
         response_data["next_action"] = "fetch_next"
-        
+
     elif request.composition_action == "regenerate_partial":
         # Count accepted vs rejected
         accepted_courses = []
         rejected_courses = []
-        
+        accepted_items = {}
+
         for course, feedback_type in [
             ("appetizer", request.appetizer_feedback),
             ("main", request.main_feedback),
@@ -437,9 +454,18 @@ def add_composition_feedback(
         ]:
             if feedback_type == FeedbackType.ACCEPTED:
                 accepted_courses.append(course)
+                accepted_items[course] = validation_state.get(course, {}).get("item_id")
             else:
                 rejected_courses.append(course)
-        
+
+        session_service.set_pending_partial_regeneration(
+            db_session=db,
+            session_id=session_id,
+            accepted=accepted_items,
+            rejected=rejected_courses,
+        )
+        db.commit()
+
         response_data["message"] = f"Keeping {len(accepted_courses)} item(s), regenerating {len(rejected_courses)} item(s)..."
         response_data["accepted_courses"] = accepted_courses
         response_data["rejected_courses"] = rejected_courses

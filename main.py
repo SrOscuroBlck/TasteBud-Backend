@@ -20,6 +20,7 @@ from scripts.migrations.migrate_add_course_cuisine import add_course_and_cuisine
 from scripts.migrations.migrate_add_ingredient_penalties import add_ingredient_penalties_column
 from scripts.migrations.migrate_add_onboarding_choices import add_onboarding_choices_column
 from scripts.migrations.add_access_request_table import add_access_request_table
+from scripts.migrations.migrate_add_partial_regen import run_migration as add_partial_regen_column
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -47,6 +48,7 @@ async def lifespan(app: FastAPI):
     add_ingredient_penalties_column()
     add_onboarding_choices_column()
     add_access_request_table()
+    add_partial_regen_column()
 
     # Load FAISS index for similarity search
     faiss_service = FAISSService()

@@ -633,15 +633,11 @@ class RecommendationService:
             order_history=order_history,
         )
 
-        candidates = self._prioritize_fresh_candidates(
-            candidates=candidates,
-            interaction_history=user_interaction_history,
-            min_candidates=top_n * 2,
-        )
-
-        candidates = self._rank_by_taste_affinity(
-            candidates=candidates,
-            user=user,
+        from services.ml.llm_reranking_service import (
+            rerank_single_items,
+            compose_full_meal,
+            compose_partial_meal_llm,
+            _matches_course_slot,
         )
 
         session_feedback = session.exec(
@@ -649,32 +645,86 @@ class RecommendationService:
                 RecommendationFeedback.session_id == recommendation_session.id
             )
         ).all()
-        
-        items_map = {str(item.id): item for item in intent_filtered}
-        candidate_id_set = {str(item.id) for item in candidates}
 
-        from services.ml.llm_reranking_service import (
-            rerank_single_items,
-            compose_full_meal,
-        )
+        items_map = {str(item.id): item for item in intent_filtered}
 
         session_items_shown = recommendation_session.items_shown or []
 
         if recommendation_session.meal_intent == "full_meal":
-            compositions_raw = compose_full_meal(
-                candidates=candidates,
+            # For full_meal: separate by course, rank each independently, then combine
+            # This ensures each course type gets its best candidates to the LLM
+            appetizers = [c for c in candidates if _matches_course_slot(c.course, "appetizer")]
+            mains = [c for c in candidates if _matches_course_slot(c.course, "main")]
+            desserts = [c for c in candidates if _matches_course_slot(c.course, "dessert")]
+
+            # Fresh-first + taste ranking per course
+            per_course = max(5, top_n * 2 // 3)
+            appetizers = self._rank_by_taste_affinity(
+                candidates=self._prioritize_fresh_candidates(
+                    appetizers, user_interaction_history, min_candidates=per_course
+                ),
                 user=user,
-                rec_session=recommendation_session,
-                feedback_list=session_feedback,
-                items_map=items_map,
-                num_compositions=max(1, top_n // 3),
-                interaction_history=user_interaction_history,
-                items_shown=session_items_shown,
-                order_history=order_history,
+            )[:per_course]
+            mains = self._rank_by_taste_affinity(
+                candidates=self._prioritize_fresh_candidates(
+                    mains, user_interaction_history, min_candidates=per_course
+                ),
+                user=user,
+            )[:per_course]
+            desserts = self._rank_by_taste_affinity(
+                candidates=self._prioritize_fresh_candidates(
+                    desserts, user_interaction_history, min_candidates=per_course
+                ),
+                user=user,
+            )[:per_course]
+
+            candidates = appetizers + mains + desserts
+
+            logger.info(
+                "Course-balanced candidates for full_meal",
+                extra={
+                    "session_id": str(recommendation_session.id),
+                    "appetizers": len(appetizers),
+                    "mains": len(mains),
+                    "desserts": len(desserts),
+                    "total": len(candidates),
+                },
             )
+
+            candidate_id_set = {str(item.id) for item in candidates}
+
+            pending = recommendation_session.pending_partial_regen
+            if pending and pending.get("accepted"):
+                compositions_raw = compose_partial_meal_llm(
+                    candidates=candidates,
+                    user=user,
+                    rec_session=recommendation_session,
+                    feedback_list=session_feedback,
+                    items_map=items_map,
+                    accepted=pending["accepted"],
+                    rejected=pending["rejected"],
+                    num_compositions=max(1, top_n // 3),
+                    interaction_history=user_interaction_history,
+                    items_shown=session_items_shown,
+                    order_history=order_history,
+                )
+                recommendation_session.pending_partial_regen = None
+            else:
+                compositions_raw = compose_full_meal(
+                    candidates=candidates,
+                    user=user,
+                    rec_session=recommendation_session,
+                    feedback_list=session_feedback,
+                    items_map=items_map,
+                    num_compositions=max(1, top_n // 3),
+                    interaction_history=user_interaction_history,
+                    items_shown=session_items_shown,
+                    order_history=order_history,
+                )
 
             results = []
             session_service = RecommendationSessionService()
+            base_iteration = recommendation_session.iteration_count
 
             for idx, comp in enumerate(compositions_raw):
                 from uuid import UUID as UUIDType
@@ -690,7 +740,7 @@ class RecommendationService:
                     session_service.set_active_composition(
                         db_session=session,
                         session_id=recommendation_session.id,
-                        composition_id=f"llm-{recommendation_session.iteration_count}-{idx}",
+                        composition_id=f"llm-{base_iteration}-{idx}",
                         appetizer_id=appetizer.id,
                         main_id=main_item.id,
                         dessert_id=dessert.id,
@@ -724,7 +774,7 @@ class RecommendationService:
                 )
 
                 results.append({
-                    "composition_id": f"llm-{recommendation_session.iteration_count}-{idx}",
+                    "composition_id": f"llm-{base_iteration}-{idx}",
                     "items": [
                         self._format_item_response(
                             session, appetizer, user, recommendation_session,
@@ -750,6 +800,18 @@ class RecommendationService:
                 return {"items": results, "type": "composition"}
 
             return {"items": [], "warnings": ["no_valid_compositions"]}
+
+        # Non-full_meal intents: rank all candidates together
+        candidates = self._prioritize_fresh_candidates(
+            candidates=candidates,
+            interaction_history=user_interaction_history,
+            min_candidates=top_n * 2,
+        )
+        candidates = self._rank_by_taste_affinity(
+            candidates=candidates,
+            user=user,
+        )
+        candidate_id_set = {str(item.id) for item in candidates}
 
         llm_ranked = rerank_single_items(
             candidates=candidates,

@@ -51,7 +51,7 @@ class ContextEnhancementService:
         hunger_level: str
     ) -> list[MenuItem]:
         course_mapping = {
-            "full_meal": ["appetizer", "main", "entree", "dinner", "dessert"],
+            "full_meal": ["appetizer", "starter", "salad", "soup", "main", "entree", "dinner", "dessert", "sweet"],
             "appetizer_only": ["appetizer", "starter", "salad", "soup"],
             "main_only": ["main", "entree", "dinner"],
             "dessert_only": ["dessert", "sweet"],
