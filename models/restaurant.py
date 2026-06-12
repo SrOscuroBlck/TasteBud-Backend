@@ -20,6 +20,11 @@ class MenuItem(SQLModel, table=True):
     name: str
     description: str = ""
     ingredients: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    # Localized user-facing content keyed by language code, e.g.
+    # {"es": {"description": "...", "ingredients": ["...", ...]}}.
+    # English originals stay in `description`/`ingredients` (also used by
+    # safety filtering and feature extraction — never overwrite them).
+    content_translations: Dict = Field(default_factory=dict, sa_column=Column(JSON))
     allergens: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     dietary_tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     cuisine: List[str] = Field(default_factory=list, sa_column=Column(JSON))

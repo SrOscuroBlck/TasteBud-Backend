@@ -97,6 +97,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not settings.RATE_LIMIT_ENABLED or not self._redis:
             return await call_next(request)
 
+        # CORS preflights must never be rate-limited: a 429 here is produced
+        # outside CORSMiddleware (no Access-Control-Allow-Origin header), which
+        # the browser reports as a CORS failure instead of a rate limit.
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         path = request.url.path
         if path in SKIP_PATHS or any(path.startswith(p) for p in SKIP_PREFIXES):
             return await call_next(request)

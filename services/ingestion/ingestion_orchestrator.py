@@ -259,6 +259,8 @@ class IngestionOrchestrator:
 
         session.commit()
 
+        self._translate_items(session, created_items)
+
         return created_items
 
     def _find_image_for_item(self, item_name: str, image_map: Dict[str, str]) -> Optional[str]:
@@ -323,9 +325,23 @@ class IngestionOrchestrator:
             self._generate_embeddings_for_item(item)
         
         session.commit()
-        
+
+        self._translate_items(session, created_items)
+
         return created_items
-    
+
+    def _translate_items(self, session: Session, items: List[MenuItem]) -> None:
+        """Generate localized descriptions/ingredients. Best-effort — a
+        translation failure must never fail an ingestion."""
+        try:
+            from services.features.translation_service import TranslationService
+            TranslationService().translate_items(items, session)
+        except Exception as e:
+            logger.warning(
+                "Menu content translation skipped",
+                extra={"error": str(e), "item_count": len(items)},
+            )
+
     def _generate_embeddings_for_item(self, item: MenuItem) -> None:
         try:
             text = f"{item.name}. {item.description or ''}. Ingredients: {', '.join(item.ingredients or [])}"

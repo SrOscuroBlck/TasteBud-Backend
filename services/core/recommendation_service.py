@@ -14,6 +14,7 @@ from services.context.context_enhancement_service import ContextEnhancementServi
 from services.learning.in_session_learning_service import InSessionLearningService
 from services.composition.meal_composition_service import MealCompositionService
 from services.explanation.explanation_enhancement_service import ExplanationEnhancementService
+from utils.localization import localized_description
 from services.user.interaction_history_service import InteractionHistoryService
 from services.evaluation.confidence_service import ConfidenceService
 from services.composition.query_service import QueryParsingService
@@ -304,7 +305,7 @@ class RecommendationService:
                 item_data = {
                     "item_id": str(item.id),
                     "name": item.name,
-                    "description": item.description,
+                    "description": localized_description(item, getattr(user, "preferred_language", "en")),
                     "course": item.course,
                     "price": item.price,
                     "image_url": item.provenance.get("image_url") if item.provenance else None,
@@ -1185,7 +1186,7 @@ class RecommendationService:
         return {
             "item_id": str(item.id),
             "name": item.name,
-            "description": item.description,
+            "description": localized_description(item, getattr(user, "preferred_language", "en")),
             "course": item.course,
             "price": item.price,
             "image_url": item.provenance.get("image_url") if item.provenance else None,

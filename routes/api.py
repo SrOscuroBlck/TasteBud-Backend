@@ -14,6 +14,7 @@ from services.learning.unified_feedback_service import UnifiedFeedbackService
 from services.context.context_enhancement_service import ContextEnhancementService
 from services.user.auth_service import auth_service, AuthenticationError
 from services.features.gpt_helper import explain_similarity
+from utils.localization import localized_content, localized_description
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -309,9 +310,23 @@ def infer_menu_item(restaurant_id: UUID, payload: Dict[str, Any]):
 
 
 @router.get("/restaurants/{restaurant_id}/menu")
-def list_menu(restaurant_id: UUID, session: Session = Depends(get_session)):
+def list_menu(restaurant_id: UUID, lang: Optional[str] = None, session: Session = Depends(get_session)):
     items = session.exec(select(MenuItem).where(MenuItem.restaurant_id == restaurant_id)).all()
-    return [{"id": str(i.id), "name": i.name, "price": i.price, "dietary_tags": i.dietary_tags} for i in items]
+    return [
+        {
+            "id": str(i.id),
+            "name": i.name,
+            "description": localized_description(i, lang),
+            "price": i.price,
+            "dietary_tags": i.dietary_tags,
+            "allergens": i.allergens,
+            "cuisine": i.cuisine,
+            "course": i.course,
+            "spice_level": i.spice_level,
+            "image_url": i.provenance.get("image_url") if i.provenance else None,
+        }
+        for i in items
+    ]
 
 
 @router.post("/restaurants")
@@ -443,6 +458,7 @@ def get_similar_items(
     cuisine: Optional[str] = None,
     max_price: Optional[float] = None,
     dietary: Optional[str] = None,
+    lang: Optional[str] = None,
     explain: bool = False
 ):
     if not request.app.state.faiss_service:
@@ -508,7 +524,7 @@ def get_similar_items(
         item_result = {
             "id": str(similar_item.id),
             "name": similar_item.name,
-            "description": similar_item.description,
+            "description": localized_description(similar_item, lang),
             "price": similar_item.price,
             "cuisine": similar_item.cuisine,
             "dietary_tags": similar_item.dietary_tags,
@@ -554,23 +570,24 @@ def get_similar_items(
 
 
 @router.get("/items/{item_id}")
-def get_item_details(item_id: UUID, session: Session = Depends(get_session)):
+def get_item_details(item_id: UUID, lang: Optional[str] = None, session: Session = Depends(get_session)):
     item = session.get(MenuItem, item_id)
     if not item:
         logger.warning("Item not found", extra={"item_id": str(item_id)})
         raise HTTPException(404, "item not found")
-    
+
     restaurant = session.get(Restaurant, item.restaurant_id)
-    
+
     logger.info("Item details retrieved", extra={"item_id": str(item_id)})
-    
+
+    description, ingredients = localized_content(item, lang)
     return {
         "id": str(item.id),
         "restaurant_id": str(item.restaurant_id),
         "restaurant_name": restaurant.name if restaurant else None,
         "name": item.name,
-        "description": item.description,
-        "ingredients": item.ingredients,
+        "description": description,
+        "ingredients": ingredients,
         "allergens": item.allergens,
         "dietary_tags": item.dietary_tags,
         "cuisine": item.cuisine,
@@ -642,6 +659,7 @@ def search_items(
     min_price: Optional[float] = None,
     restaurant_id: Optional[UUID] = None,
     limit: int = 50,
+    lang: Optional[str] = None,
     session: Session = Depends(get_session)
 ):
     query = select(MenuItem)
@@ -653,8 +671,12 @@ def search_items(
     
     filtered_items = []
     for item in items:
-        if q and q.lower() not in item.name.lower() and q.lower() not in (item.description or "").lower():
-            continue
+        # Match the query against the original and the localized description,
+        # so Spanish users can search in Spanish.
+        if q:
+            haystack = f"{item.name} {item.description or ''} {localized_description(item, lang)}".lower()
+            if q.lower() not in haystack:
+                continue
         
         if cuisine and cuisine not in item.cuisine:
             continue
@@ -678,7 +700,7 @@ def search_items(
         results.append({
             "id": str(item.id),
             "name": item.name,
-            "description": item.description,
+            "description": localized_description(item, lang),
             "restaurant_id": str(item.restaurant_id),
             "restaurant_name": restaurant.name if restaurant else None,
             "cuisine": item.cuisine,

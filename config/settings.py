@@ -22,7 +22,14 @@ class Settings:
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
     # CORS
-    ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+    ALLOWED_ORIGINS: List[str] = [
+        o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()
+    ]
+    # Localhost (any port) is always allowed so local frontend dev works
+    # regardless of what ALLOWED_ORIGINS is set to in production.
+    ALLOWED_ORIGIN_REGEX: str = os.getenv(
+        "ALLOWED_ORIGIN_REGEX", r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+    )
 
     # Onboarding
     ONBOARDING_MAX_QUESTIONS: int = int(os.getenv("ONBOARDING_MAX_QUESTIONS", "7"))

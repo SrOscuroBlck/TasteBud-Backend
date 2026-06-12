@@ -22,6 +22,7 @@ from scripts.migrations.migrate_add_onboarding_choices import add_onboarding_cho
 from scripts.migrations.add_access_request_table import add_access_request_table
 from scripts.migrations.migrate_add_partial_regen import run_migration as add_partial_regen_column
 from scripts.migrations.migrate_add_preferred_language import add_preferred_language_column
+from scripts.migrations.migrate_add_content_translations import add_content_translations_column
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -51,6 +52,7 @@ async def lifespan(app: FastAPI):
     add_access_request_table()
     add_partial_regen_column()
     add_preferred_language_column()
+    add_content_translations_column()
 
     # Load FAISS index for similarity search
     faiss_service = FAISSService()
@@ -85,6 +87,7 @@ app = FastAPI(title="TasteBud API", version="0.1.0", debug=settings.DEBUG, lifes
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origin_regex=settings.ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -325,4 +325,6 @@ Make it personal and specific. Start with the dish name. {lang_instruction}"""
                 extra={"error": str(e), "item_id": str(item.id)},
                 exc_info=True
             )
+            if lang == "es":
+                return f"{item.name} coincide con tus gustos"
             return f"{item.name} matches your taste preferences"
